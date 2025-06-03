@@ -1,11 +1,420 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Unity Save System Docs</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unity Save System - API Documentation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .class-header {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 20px;
+        }
+        
+        .method {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+        }
+        
+        .property {
+            background: #fff3cd;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border-left: 3px solid #ffc107;
+        }
+        
+        code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin: 8px 0;
+        }
+        
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            padding: 5px 10px;
+            display: block;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .toc a:hover {
+            background: #e9ecef;
+        }
+        
+        .quick-start {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .feature-card h3 {
+            color: #495057;
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Unity Save System Documentation</h1>
-    <p>Your content here...</p>
+    <div class="header">
+        <h1>Unity Advanced Save System</h1>
+        <p>Complete API Documentation & Usage Guide</p>
+    </div>
+
+    <div class="quick-start">
+        <h2>🚀 Quick Start</h2>
+        <div class="code-block">
+// 1. Implement ISaveableData on your MonoBehaviour
+public class PlayerData : MonoBehaviour, ISaveableData {
+    public int LoadOrder { get; set; } = 0;
+    
+    [Saveable] public int health = 100;
+    [Saveable] public float experience = 0f;
+    
+    public string GetSaveID() => "PlayerData_" + gameObject.name;
+}
+
+// 2. Create and use save slots
+SaveSlotsManager manager = FindObjectOfType&lt;SaveSlotsManager&gt;();
+manager.CreateSaveSlot("GameSave1");
+manager.RegisterEveryObjectIntoSlot("GameSave1");
+manager.SaveToSaveSlot("GameSave1");
+        </div>
+    </div>
+
+    <div class="toc">
+        <h2>📚 Table of Contents</h2>
+        <ul>
+            <li><a href="#core-classes">Core Classes</a></li>
+            <li><a href="#interfaces">Interfaces</a></li>
+            <li><a href="#utilities">Utility Classes</a></li>
+            <li><a href="#auto-components">Auto Components</a></li>
+            <li><a href="#examples">Usage Examples</a></li>
+        </ul>
+    </div>
+
+    <div id="core-classes" class="section">
+        <h2>🏗️ Core Classes</h2>
+        
+        <div class="class-header">
+            <h3>SaveSlotsManager</h3>
+            <p>Main component for managing multiple save slots and coordinating save/load operations.</p>
+        </div>
+
+        <div class="method">
+            <h4>CreateSaveSlot(string saveSlotName)</h4>
+            <p>Creates a new save slot with the specified name.</p>
+            <strong>Parameters:</strong>
+            <ul>
+                <li><code>saveSlotName</code> - Unique identifier for the save slot</li>
+            </ul>
+        </div>
+
+        <div class="method">
+            <h4>RegisterEveryObjectIntoSlot(string saveSlotName)</h4>
+            <p>Automatically finds and registers all ISaveableData objects in the scene to the specified slot.</p>
+        </div>
+
+        <div class="method">
+            <h4>SaveToSaveSlot(string saveSlotName)</h4>
+            <p>Saves all registered objects' data to the specified save slot with encryption and compression.</p>
+        </div>
+
+        <div class="method">
+            <h4>LoadFromSaveSlot(string saveSlotName)</h4>
+            <p>Loads data from the specified save slot and applies it to registered objects.</p>
+        </div>
+
+        <div class="method">
+            <h4>bool IsValidSaveSlotName(string name)</h4>
+            <p>Validates save slot name for file system compatibility and security.</p>
+            <strong>Returns:</strong> True if name is valid, false otherwise.
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="class-header">
+            <h3>DataPersistance</h3>
+            <p>Handles individual save slot operations including encryption, compression, and file management.</p>
+        </div>
+
+        <div class="method">
+            <h4>Register(ISaveableData saveable)</h4>
+            <p>Registers an object for saving/loading in this save slot.</p>
+        </div>
+
+        <div class="method">
+            <h4>bool SaveAll()</h4>
+            <p>Saves all registered objects to encrypted, compressed file. Returns success status.</p>
+        </div>
+
+        <div class="method">
+            <h4>bool LoadAll()</h4>
+            <p>Loads data respecting LoadOrder property. Returns success status.</p>
+        </div>
+
+        <div class="method">
+            <h4>bool ChangeName(string newName)</h4>
+            <p>Safely renames the save slot and its associated files.</p>
+        </div>
+    </div>
+
+    <div id="interfaces" class="section">
+        <h2>🔌 Interfaces</h2>
+        
+        <div class="class-header">
+            <h3>ISaveableData</h3>
+            <p>Interface that must be implemented by any class that wants to participate in the save system.</p>
+        </div>
+
+        <div class="property">
+            <h4>int LoadOrder { get; set; }</h4>
+            <p>Determines the order in which objects are loaded. Lower numbers load first.</p>
+        </div>
+
+        <div class="method">
+            <h4>string GetSaveID()</h4>
+            <p>Must return a unique identifier for this saveable object.</p>
+            <strong>Example:</strong>
+            <div class="code-block">
+public string GetSaveID() => "PlayerStats_" + gameObject.GetInstanceID();
+            </div>
+        </div>
+    </div>
+
+    <div id="utilities" class="section">
+        <h2>🛠️ Utility Classes</h2>
+        
+        <div class="class-header">
+            <h3>SaveableAttribute</h3>
+            <p>Mark fields with [Saveable] to include them in save/load operations.</p>
+        </div>
+
+        <div class="class-header">
+            <h3>EncryptionUtility</h3>
+            <p>Provides AES encryption for save file security.</p>
+        </div>
+        
+        <div class="method">
+            <h4>byte[] Encrypt(byte[] data, byte[] key)</h4>
+            <p>Encrypts data using AES encryption with automatically generated IV.</p>
+        </div>
+
+        <div class="class-header">
+            <h3>GZIP</h3>
+            <p>Compresses save data to reduce file size and improve performance.</p>
+        </div>
+    </div>
+
+    <div id="auto-components" class="section">
+        <h2>🤖 Auto Components</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>AutoSave</h3>
+                <p>Automatically saves at specified intervals. Perfect for preventing data loss.</p>
+                <div class="code-block">
+// Set frequency in inspector
+public float _autoSaveFrequency = 30f; // 30 seconds
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <h3>AutoLoad</h3>
+                <p>Automatically loads all save slots on Start(). Useful for game initialization.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>AutoRegister</h3>
+                <p>Automatically registers all ISaveableData objects when scenes load.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="examples" class="section">
+        <h2>💡 Complete Usage Examples</h2>
+        
+        <h3>Basic Player Save System</h3>
+        <div class="code-block">
+public class PlayerController : MonoBehaviour, ISaveableData {
+    public int LoadOrder { get; set; } = 0;
+    
+    [Saveable] public int level = 1;
+    [Saveable] public float experience = 0f;
+    [Saveable] public Vector3 position;
+    
+    private SaveSlotsManager saveManager;
+    
+    void Start() {
+        saveManager = FindObjectOfType&lt;SaveSlotsManager&gt;();
+        
+        // Create save slot if it doesn't exist
+        if (!saveManager.DoesSaveSlotExist("PlayerSave")) {
+            saveManager.CreateSaveSlot("PlayerSave");
+        }
+        
+        // Register this object
+        saveManager.RegisterObjectIntoSlot("PlayerSave", this);
+        
+        // Load existing data
+        saveManager.LoadFromSaveSlot("PlayerSave");
+    }
+    
+    public string GetSaveID() => "Player_" + gameObject.name;
+    
+    // Save when player levels up
+    public void LevelUp() {
+        level++;
+        experience = 0f;
+        saveManager.SaveToSaveSlot("PlayerSave");
+    }
+}
+        </div>
+
+        <h3>Multi-Slot Game Save System</h3>
+        <div class="code-block">
+public class GameManager : MonoBehaviour {
+    private SaveSlotsManager saveManager;
+    
+    void Start() {
+        saveManager = FindObjectOfType&lt;SaveSlotsManager&gt;();
+        
+        // Create multiple save slots
+        for (int i = 1; i <= 3; i++) {
+            string slotName = "GameSlot" + i;
+            if (!saveManager.DoesSaveSlotExist(slotName)) {
+                saveManager.CreateSaveSlot(slotName);
+            }
+        }
+    }
+    
+    public void SaveGame(int slotNumber) {
+        string slotName = "GameSlot" + slotNumber;
+        saveManager.RegisterEveryObjectIntoSlot(slotName);
+        saveManager.SaveToSaveSlot(slotName);
+        Debug.Log($"Game saved to slot {slotNumber}");
+    }
+    
+    public void LoadGame(int slotNumber) {
+        string slotName = "GameSlot" + slotNumber;
+        saveManager.LoadFromSaveSlot(slotName);
+        Debug.Log($"Game loaded from slot {slotNumber}");
+    }
+}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔒 Security Features</h2>
+        <ul>
+            <li><strong>AES Encryption:</strong> All save files are encrypted with unique keys</li>
+            <li><strong>Key Management:</strong> Encryption keys are stored separately from save data</li>
+            <li><strong>File Validation:</strong> Save slot names are validated against file system attacks</li>
+            <li><strong>GZIP Compression:</strong> Reduces file size and adds obfuscation</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>⚡ Performance Features</h2>
+        <ul>
+            <li><strong>Load Order Management:</strong> Control initialization sequence</li>
+            <li><strong>Selective Field Saving:</strong> Only marked fields are processed</li>
+            <li><strong>Compression:</strong> Faster I/O with smaller files</li>
+            <li><strong>Batch Operations:</strong> Efficient multi-object save/load</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Best Practices</h2>
+        <ul>
+            <li>Use meaningful GetSaveID() implementations to avoid conflicts</li>
+            <li>Set appropriate LoadOrder for dependencies (managers load before dependents)</li>
+            <li>Mark only necessary fields with [Saveable] for performance</li>
+            <li>Use AutoSave component for critical data protection</li>
+            <li>Validate save slot names in UI to prevent errors</li>
+        </ul>
+    </div>
+
+    <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #6c757d;">
+        <p>Unity Advanced Save System - Complete solution for game data persistence</p>
+    </footer>
 </body>
 </html>
