@@ -142,31 +142,71 @@
             padding: 15px;
             font-size: 12px;
         }
+
+        .async-section {
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Unity Advanced Save System</h1>
-        <p>Complete API Documentation & Usage Guide</p>
+        <p>Complete API Documentation & Usage Guide v2.0</p>
     </div>
 
     <div class="quick-example">
-        <h2>🚀 Quick Start</h2>
+        <h2>🚀 Quick Start Example</h2>
         <div class="code-block">// 1. Implement ISaveableData on your MonoBehaviour
 public class PlayerData : MonoBehaviour, ISaveableData {
     public int LoadOrder { get; set; } = 0;
     
     [Saveable] public int health = 100;
     [Saveable] public float experience = 0f;
+    [Saveable] public Vector3 position;
     
     public string GetSaveID() => "PlayerData_" + gameObject.name;
+    
+    public void OnDataLoaded() {
+        // Called after data is loaded - perfect for updates
+        transform.position = position;
+        Debug.Log($"Player loaded with {health} health and {experience} XP");
+    }
 }
 
-// 2. Create and use save slots
+// 2. Setup save manager and create slots
 SaveSlotsManager manager = FindObjectOfType<SaveSlotsManager>();
 manager.CreateSaveSlot("GameSave1");
 manager.RegisterEveryObjectIntoSlot("GameSave1");
-manager.SaveToSaveSlot("GameSave1");</div>
+
+// 3. Save/Load with progress tracking
+var progress = new Progress<SaveProgress>(p => {
+    Debug.Log($"{p.Phase}: {p.Percentage:P} - {p.CurrentItem}");
+});
+
+await manager.GetSaveSlot("GameSave1").SaveAllAsync(progress);
+await manager.GetSaveSlot("GameSave1").LoadAllAsync(progress);</div>
     </div>
 
     <div class="toc">
@@ -176,7 +216,9 @@ manager.SaveToSaveSlot("GameSave1");</div>
             <li><a href="#interfaces">Interfaces</a></li>
             <li><a href="#utilities">Utility Classes</a></li>
             <li><a href="#auto-components">Auto Components</a></li>
-            <li><a href="#examples">Usage Examples</a></li>
+            <li><a href="#async-operations">Async Operations</a></li>
+            <li><a href="#encryption-compression">Encryption & Compression</a></li>
+            <li><a href="#examples">Complete Examples</a></li>
         </ul>
     </div>
 
@@ -190,59 +232,163 @@ manager.SaveToSaveSlot("GameSave1");</div>
 
         <div class="method">
             <h4>CreateSaveSlot(string saveSlotName)</h4>
-            <p>Creates a new save slot with the specified name.</p>
+            <p>Creates a new save slot with the specified name and validation.</p>
             <strong>Parameters:</strong>
             <ul>
-                <li><code>saveSlotName</code> - Unique identifier for the save slot</li>
+                <li><code>saveSlotName</code> - Unique identifier for the save slot (validated for security)</li>
             </ul>
+            <div class="code-block">// Create multiple save slots for different players
+manager.CreateSaveSlot("Player1_MainSave");
+manager.CreateSaveSlot("Player1_Checkpoint");
+manager.CreateSaveSlot("Player2_MainSave");</div>
         </div>
 
         <div class="method">
             <h4>RegisterEveryObjectIntoSlot(string saveSlotName)</h4>
-            <p>Automatically finds and registers all ISaveableData objects in the scene to the specified slot.</p>
+            <p>Automatically finds and registers all ISaveableData objects in the scene. Uses Unity 2023+ optimized methods when available.</p>
+            <div class="code-block">// Register all saveable objects in current scene
+manager.RegisterEveryObjectIntoSlot("MainGame");
+
+// This finds all MonoBehaviours implementing ISaveableData
+// and adds them to the specified save slot</div>
+        </div>
+
+        <div class="method">
+            <h4>RegisterObjectIntoSlot(string slotName, ISaveableData obj)</h4>
+            <p>Registers a specific object into a save slot for selective saving.</p>
+            <div class="code-block">// Register specific objects to different slots
+PlayerController player = FindObjectOfType<PlayerController>();
+GameSettings settings = FindObjectOfType<GameSettings>();
+
+manager.RegisterObjectIntoSlot("PlayerData", player);
+manager.RegisterObjectIntoSlot("GameConfig", settings);</div>
         </div>
 
         <div class="method">
             <h4>SaveToSaveSlot(string saveSlotName)</h4>
             <p>Saves all registered objects' data to the specified save slot with encryption and compression.</p>
+            <div class="code-block">// Simple synchronous save
+manager.SaveToSaveSlot("QuickSave");
+
+// Subscribe to save events
+SaveSlotsManager.OnSaveToSlot += (slotName) => {
+    Debug.Log($"Saved to slot: {slotName}");
+    ShowSaveNotification();
+};</div>
         </div>
 
         <div class="method">
             <h4>LoadFromSaveSlot(string saveSlotName)</h4>
-            <p>Loads data from the specified save slot and applies it to registered objects.</p>
+            <p>Loads data from the specified save slot, respecting LoadOrder for proper initialization sequence.</p>
+            <div class="code-block">// Load with automatic ordering
+manager.LoadFromSaveSlot("MainSave");
+
+// Objects with lower LoadOrder values load first
+// Perfect for dependencies (managers before game objects)</div>
+        </div>
+
+        <div class="method">
+            <h4>RenameSaveSlot(string saveSlotName, string newName)</h4>
+            <p>Safely renames a save slot and its associated files.</p>
+            <div class="code-block">// Rename saves (useful for user-friendly names)
+manager.RenameSaveSlot("Slot1", "BeforeBossFight");
+manager.RenameSaveSlot("Slot2", "PostVictory");</div>
+        </div>
+
+        <div class="method">
+            <h4>DeleteSaveSlot(string saveSlotName)</h4>
+            <p>Completely removes a save slot from memory and deletes all associated files.</p>
+            <div class="code-block">// Clean up old saves
+manager.DeleteSaveSlot("TempCheckpoint");
+
+// Removes from memory and deletes:
+// - Main save file
+// - Encryption key file</div>
         </div>
 
         <div class="method">
             <h4>bool IsValidSaveSlotName(string name)</h4>
-            <p>Validates save slot name for file system compatibility and security.</p>
-            <strong>Returns:</strong> True if name is valid, false otherwise.
+            <p>Validates save slot name for file system compatibility and security against path traversal attacks.</p>
+            <div class="code-block">// Validate user input before creating saves
+string userInput = saveNameInputField.text;
+if (manager.IsValidSaveSlotName(userInput)) {
+    manager.CreateSaveSlot(userInput);
+} else {
+    ShowError("Invalid save name. Avoid special characters.");
+}</div>
         </div>
     </div>
 
     <div class="section">
         <div class="class-header">
             <h3>DataPersistance</h3>
-            <p>Handles individual save slot operations including encryption, compression, and file management.</p>
+            <p>Handles individual save slot operations including async operations, encryption, compression, and file management.</p>
         </div>
 
         <div class="method">
-            <h4>Register(ISaveableData saveable)</h4>
-            <p>Registers an object for saving/loading in this save slot.</p>
+            <h4>async Task&lt;bool&gt; SaveAllAsync(IProgress&lt;SaveProgress&gt; progress, CancellationToken cancellationToken)</h4>
+            <p>Asynchronously saves all registered objects with progress reporting and cancellation support.</p>
+            <div class="code-block">// Save with progress tracking
+var progress = new Progress<SaveProgress>(p => {
+    progressBar.value = p.Percentage;
+    statusText.text = $"{p.Phase}: {p.CurrentItem}";
+});
+
+var cts = new CancellationTokenSource();
+bool success = await slot.SaveAllAsync(progress, cts.Token);
+
+if (success) {
+    Debug.Log("Save completed successfully");
+} else {
+    Debug.Log("Save was cancelled or failed");
+}</div>
         </div>
 
         <div class="method">
-            <h4>bool SaveAll()</h4>
-            <p>Saves all registered objects to encrypted, compressed file. Returns success status.</p>
+            <h4>async Task&lt;bool&gt; LoadAllAsync(IProgress&lt;SaveProgress&gt; progress, CancellationToken cancellationToken)</h4>
+            <p>Asynchronously loads data respecting LoadOrder with progress reporting.</p>
+            <div class="code-block">// Load with progress and error handling
+try {
+    var progress = new Progress<SaveProgress>(p => {
+        loadingSlider.value = p.Percentage;
+        Debug.Log($"Loading: {p.CompletedItems}/{p.TotalItems}");
+    });
+    
+    bool success = await slot.LoadAllAsync(progress, cancellationToken);
+    if (success) {
+        SceneManager.LoadScene("GameScene");
+    }
+} catch (OperationCanceledException) {
+    Debug.Log("Load operation cancelled by user");
+}</div>
         </div>
 
         <div class="method">
-            <h4>bool LoadAll()</h4>
-            <p>Loads data respecting LoadOrder property. Returns success status.</p>
+            <h4>async Task&lt;bool&gt; ChangeNameAsync(string newName, CancellationToken cancellationToken)</h4>
+            <p>Asynchronously renames the save slot and moves associated files safely.</p>
+            <div class="code-block">// Rename with async safety
+var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+bool renamed = await slot.ChangeNameAsync("NewSlotName", cts.Token);
+
+if (renamed) {
+    UpdateUIWithNewName("NewSlotName");
+} else {
+    ShowError("Failed to rename save file");
+}</div>
         </div>
 
         <div class="method">
-            <h4>bool ChangeName(string newName)</h4>
-            <p>Safely renames the save slot and its associated files.</p>
+            <h4>Register(ISaveableData saveable) / Unregister(ISaveableData saveable)</h4>
+            <p>Manage objects within the save slot for fine-grained control.</p>
+            <div class="code-block">// Dynamic registration management
+DataPersistance slot = manager.GetSaveSlot("DynamicSave");
+
+// Register new objects at runtime
+slot.Register(newPlayerWeapon);
+slot.Register(dynamicallySpawnedNPC);
+
+// Unregister destroyed objects
+slot.Unregister(destroyedBuilding);</div>
         </div>
     </div>
 
@@ -255,15 +401,74 @@ manager.SaveToSaveSlot("GameSave1");</div>
         </div>
 
         <div class="property">
-            <h4>int LoadOrder { get; set; }</h4>
-            <p>Determines the order in which objects are loaded. Lower numbers load first.</p>
+            <h4>int LoadOrder { get; }</h4>
+            <p>Determines the order in which objects are loaded. Lower numbers load first (managers before game objects).</p>
+            <div class="code-block">// Example load order hierarchy:
+// -100: Core game managers
+// -50:  Scene managers  
+// 0:    Default game objects
+// 50:   UI elements
+// 100:  Effects and decorations
+
+public class GameManager : MonoBehaviour, ISaveableData {
+    public int LoadOrder => -100; // Load first
+}
+
+public class PlayerController : MonoBehaviour, ISaveableData {
+    public int LoadOrder => 0; // Load with other game objects
+}
+
+public class UIManager : MonoBehaviour, ISaveableData {
+    public int LoadOrder => 50; // Load after game objects
+}</div>
         </div>
 
         <div class="method">
             <h4>string GetSaveID()</h4>
-            <p>Must return a unique identifier for this saveable object.</p>
-            <strong>Example:</strong>
-            <div class="code-block">public string GetSaveID() => "PlayerStats_" + gameObject.GetInstanceID();</div>
+            <p>Must return a unique identifier for this saveable object. Critical for data consistency.</p>
+            <div class="code-block">// Different strategies for unique IDs:
+
+// Strategy 1: Type + Instance ID (simple, reliable)
+public string GetSaveID() => $"{GetType().Name}_{gameObject.GetInstanceID()}";
+
+// Strategy 2: Type + Name (human readable)
+public string GetSaveID() => $"{GetType().Name}_{gameObject.name}";
+
+// Strategy 3: Custom ID for important singletons
+public string GetSaveID() => "PlayerController_Main";
+
+// Strategy 4: Hierarchical ID for complex scenes
+public string GetSaveID() => $"{transform.GetSiblingIndex()}_{gameObject.name}";</div>
+        </div>
+
+        <div class="method">
+            <h4>void OnDataLoaded()</h4>
+            <p>Called after the object's data has been loaded. Perfect for post-load updates and state synchronization.</p>
+            <div class="code-block">public class PlayerController : MonoBehaviour, ISaveableData {
+    [Saveable] public Vector3 savedPosition;
+    [Saveable] public int health;
+    [Saveable] public string[] unlockedAchievements;
+    
+    public void OnDataLoaded() {
+        // Apply position immediately
+        transform.position = savedPosition;
+        
+        // Update UI elements
+        healthBar.value = health;
+        
+        // Trigger achievement notifications
+        foreach (string achievement in unlockedAchievements) {
+            AchievementSystem.Instance.ShowUnlocked(achievement);
+        }
+        
+        // Validate loaded data
+        if (health <= 0) {
+            health = 1; // Prevent loading with 0 health
+        }
+        
+        Debug.Log($"Player loaded at {savedPosition} with {health} health");
+    }
+}</div>
         </div>
     </div>
 
@@ -272,17 +477,66 @@ manager.SaveToSaveSlot("GameSave1");</div>
         
         <div class="class-header">
             <h3>SaveableAttribute</h3>
-            <p>Mark fields with [Saveable] to include them in save/load operations.</p>
+            <p>Mark fields with [Saveable] to include them in save/load operations. Only marked fields are processed.</p>
+        </div>
+        
+        <div class="code-block">public class WeaponStats : MonoBehaviour, ISaveableData {
+    [Saveable] public int damage = 10;
+    [Saveable] public float fireRate = 1.0f;
+    [Saveable] public bool isUnlocked = false;
+    [Saveable] public WeaponType weaponType = WeaponType.Sword;
+    
+    // This field won't be saved (no [Saveable] attribute)
+    public ParticleSystem fireEffect;
+    
+    public int LoadOrder => 0;
+    public string GetSaveID() => $"Weapon_{weaponType}";
+    public void OnDataLoaded() => UpdateWeaponVisuals();
+}</div>
+
+        <div class="class-header">
+            <h3>SaveableUtility</h3>
+            <p>Internal utility for extracting and applying save data using reflection and attribute scanning.</p>
+        </div>
+
+        <div class="method">
+            <h4>object ExtractSaveData(object target)</h4>
+            <p>Scans target object for [Saveable] fields and extracts their values into a dictionary.</p>
+        </div>
+
+        <div class="method">
+            <h4>void ApplySaveData(object target, object rawData)</h4>
+            <p>Applies saved data back to target object, handling type conversion and JSON objects safely.</p>
         </div>
 
         <div class="class-header">
             <h3>EncryptionUtility</h3>
-            <p>Provides AES encryption for save file security.</p>
+            <p>Provides AES encryption with unique IV generation for each save file.</p>
+        </div>
+
+        <div class="method">
+            <h4>byte[] Encrypt(byte[] data, byte[] key)</h4>
+            <p>Encrypts data with AES encryption, automatically generating and prepending IV.</p>
+        </div>
+
+        <div class="method">
+            <h4>byte[] Decrypt(byte[] encryptedDataWithIV, byte[] key)</h4>
+            <p>Decrypts data by extracting IV and decrypting the remaining data.</p>
+        </div>
+
+        <div class="method">
+            <h4>byte[] GenerateKey()</h4>
+            <p>Generates a cryptographically secure random key for AES encryption.</p>
         </div>
 
         <div class="class-header">
             <h3>GZIP</h3>
-            <p>Compresses save data to reduce file size and improve performance.</p>
+            <p>Compresses save data to reduce file size and improve I/O performance.</p>
+        </div>
+
+        <div class="method">
+            <h4>byte[] Compress(string text) / string Decompress(byte[] compressed)</h4>
+            <p>GZIP compression and decompression utilities for text data.</p>
         </div>
     </div>
 
@@ -291,126 +545,896 @@ manager.SaveToSaveSlot("GameSave1");</div>
         
         <div class="feature-grid">
             <div class="feature-card">
+                <h3>AutoRegister</h3>
+                <p>Automatically registers all ISaveableData objects when scenes load. Fires events for coordination with other auto components.</p>
+                <div class="code-block">public class AutoRegister : MonoBehaviour {
+    [Tooltip("Name of the save slot to register objects to")]
+    public string _saveSlotName = "MainSave";
+    
+    // Static event for other systems to listen to
+    public static event Action OnObjectsRegistered;
+}</div>
+                <div class="info">
+                    <strong>Usage:</strong> Add to a GameObject in each scene where you want automatic registration. Set execution order to -50 to ensure it runs early.
+                </div>
+            </div>
+            
+            <div class="feature-card">
                 <h3>AutoSave</h3>
-                <p>Automatically saves at specified intervals. Perfect for preventing data loss.</p>
-                <div class="code-block">// Set frequency in inspector
-public float _autoSaveFrequency = 30f; // 30 seconds</div>
+                <p>Automatically saves at specified intervals with options for sequential or synchronous saving.</p>
+                <div class="code-block">public class AutoSave : MonoBehaviour {
+    [SerializeField] private bool _loadSequentially = false;
+    [SerializeField] private SaveSlotsManager _saveManager;
+    [SerializeField] private float _autoSaveFrequency = 30f;
+    
+    public void StopAutoSave() { /* ... */ }
+    public void ResumeAutoSave() { /* ... */ }
+}</div>
+                <div class="warning">
+                    <strong>Performance:</strong> Sequential mode saves slots one by one. Synchronous mode saves all slots in parallel but waits for completion.
+                </div>
             </div>
             
             <div class="feature-card">
                 <h3>AutoLoad</h3>
-                <p>Automatically loads all save slots on Start(). Useful for game initialization.</p>
+                <p>Automatically loads all save slots when scenes start, with parallel or sequential options.</p>
+                <div class="code-block">public class AutoLoad : MonoBehaviour {
+    [SerializeField] private bool loadInParallel = false;
+    
+    // Listens to AutoRegister.OnObjectsRegistered
+    // to ensure objects are registered before loading
+}</div>
+                <div class="info">
+                    <strong>Coordination:</strong> Waits for AutoRegister to complete before loading, ensuring proper initialization order.
+                </div>
+            </div>
+        </div>
+
+        <h3>Complete Auto Component Setup</h3>
+        <div class="code-block">// Scene Setup Example:
+// 1. GameObject: "SaveSystem" 
+//    - SaveSlotsManager component
+//    - AutoRegister component (_saveSlotName = "GameData")
+//    - AutoSave component (_autoSaveFrequency = 60)
+//    - AutoLoad component (loadInParallel = false)
+
+// This setup will:
+// 1. Create "GameData" save slot when scene loads
+// 2. Register all ISaveableData objects automatically
+// 3. Load existing data from "GameData" slot
+// 4. Auto-save every 60 seconds thereafter</div>
+    </div>
+
+    <div id="async-operations" class="section">
+        <div class="async-section">
+            <h2>⚡ Async Operations & Progress Tracking</h2>
+            <p>Modern async/await patterns with cancellation and progress reporting for smooth user experience.</p>
+        </div>
+        
+        <div class="class-header">
+            <h3>SaveProgress Class</h3>
+            <p>Comprehensive progress reporting for save/load operations.</p>
+        </div>
+
+        <div class="code-block">public class SaveProgress {
+    public string Phase { get; set; }        // Current operation phase
+    public int CompletedItems { get; set; }  // Items completed
+    public int TotalItems { get; set; }      // Total items to process
+    public string CurrentItem { get; set; }  // Currently processing item
+    
+    public float Percentage => TotalItems > 0 ? (float)CompletedItems / TotalItems : 0f;
+}</div>
+
+        <h3>Advanced Async Examples</h3>
+        
+        <div class="method">
+            <h4>Progress Tracking with UI Updates</h4>
+            <div class="code-block">public class SaveLoadUI : MonoBehaviour {
+    [SerializeField] private Slider progressSlider;
+    [SerializeField] private Text statusText;
+    [SerializeField] private Button cancelButton;
+    
+    private CancellationTokenSource cancellationTokenSource;
+    
+    public async void SaveGameWithProgress() {
+        cancellationTokenSource = new CancellationTokenSource();
+        
+        var progress = new Progress<SaveProgress>(UpdateUI);
+        var saveSlot = saveManager.GetSaveSlot("MainSave");
+        
+        try {
+            progressSlider.gameObject.SetActive(true);
+            cancelButton.onClick.AddListener(() => cancellationTokenSource.Cancel());
+            
+            bool success = await saveSlot.SaveAllAsync(progress, cancellationTokenSource.Token);
+            
+            if (success) {
+                statusText.text = "Save completed successfully!";
+                await Task.Delay(2000); // Show success message
+            }
+        }
+        catch (OperationCanceledException) {
+            statusText.text = "Save cancelled by user";
+        }
+        catch (Exception ex) {
+            statusText.text = $"Save failed: {ex.Message}";
+        }
+        finally {
+            progressSlider.gameObject.SetActive(false);
+            cancellationTokenSource?.Dispose();
+        }
+    }
+    
+    private void UpdateUI(SaveProgress progress) {
+        progressSlider.value = progress.Percentage;
+        statusText.text = $"{progress.Phase}: {progress.CurrentItem}";
+    }
+}</div>
+        </div>
+
+        <div class="method">
+            <h4>Batch Operations with Multiple Slots</h4>
+            <div class="code-block">public async Task SaveAllSlotsAsync() {
+    var saveSlots = saveManager.SaveSlots;
+    var saveTasks = new List<Task<bool>>();
+    
+    // Start all save operations in parallel
+    foreach (var slot in saveSlots) {
+        var progress = new Progress<SaveProgress>(p => 
+            Debug.Log($"Slot '{slot.Name}': {p.Phase} - {p.Percentage:P}")
+        );
+        
+        saveTasks.Add(slot.SaveAllAsync(progress, cancellationToken));
+    }
+    
+    // Wait for all to complete
+    bool[] results = await Task.WhenAll(saveTasks);
+    
+    // Report results
+    for (int i = 0; i < results.Length; i++) {
+        Debug.Log($"Slot '{saveSlots[i].Name}' saved: {results[i]}");
+    }
+}</div>
+        </div>
+    </div>
+
+    <div id="encryption-compression" class="section">
+        <h2>🔒 Security & Compression Features</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Encryption Modes</h3>
+                <div class="code-block">public enum Encryption {
+    None,  // No encryption
+    AES    // AES-256 encryption
+}
+
+// Configure in SaveSlotsManager
+public Encryption _encryptionMode = Encryption.AES;</div>
+                <p>AES encryption with unique initialization vectors for each save file. Keys are stored separately from save data.</p>
             </div>
             
             <div class="feature-card">
-                <h3>AutoRegister</h3>
-                <p>Automatically registers all ISaveableData objects when scenes load.</p>
+                <h3>Compression Modes</h3>
+                <div class="code-block">public enum Compression {
+    None,  // No compression
+    GZIP   // GZIP compression
+}
+
+// Configure in SaveSlotsManager  
+public Compression _compressionMode = Compression.GZIP;</div>
+                <p>GZIP compression reduces file size by 60-80% on average, improving save/load performance.</p>
             </div>
         </div>
+
+        <h3>Backward Compatibility</h3>
+        <div class="info">
+            The system automatically detects and loads save files created with different encryption/compression settings, ensuring backward compatibility when you change settings.
+        </div>
+
+        <div class="code-block">// The system tries to load saves in this order:
+// 1. Current settings (encryption + compression)
+// 2. All possible combinations for compatibility:
+//    - AES + GZIP
+//    - AES + None  
+//    - None + GZIP
+//    - None + None
+// 3. Legacy format (old system compatibility)</div>
     </div>
 
     <div id="examples" class="section">
         <h2>💡 Complete Usage Examples</h2>
         
-        <h3>Basic Player Save System</h3>
-        <div class="code-block">public class PlayerController : MonoBehaviour, ISaveableData {
-    public int LoadOrder { get; set; } = 0;
+        <h3>1. RPG Player Save System</h3>
+        <div class="code-block">public class RPGPlayer : MonoBehaviour, ISaveableData {
+    public int LoadOrder => -10; // Load before other game objects
     
+    [Header("Core Stats")]
     [Saveable] public int level = 1;
     [Saveable] public float experience = 0f;
+    [Saveable] public int health = 100;
+    [Saveable] public int mana = 50;
+    
+    [Header("Position & Scene")]
     [Saveable] public Vector3 position;
+    [Saveable] public string currentScene = "StartingTown";
+    
+    [Header("Inventory")]
+    [Saveable] public List<string> inventory = new();
+    [Saveable] public Dictionary<string, int> questProgress = new();
+    
+    [Header("Preferences")]
+    [Saveable] public GameSettings playerSettings;
     
     private SaveSlotsManager saveManager;
     
     void Start() {
         saveManager = FindObjectOfType<SaveSlotsManager>();
         
-        // Create save slot if it doesn't exist
-        if (!saveManager.DoesSaveSlotExist("PlayerSave")) {
-            saveManager.CreateSaveSlot("PlayerSave");
+        // Create player-specific save slot
+        string playerSlot = $"Player_{PlayerPrefs.GetString("PlayerName", "Default")}";
+        
+        if (!saveManager.DoesSaveSlotExist(playerSlot)) {
+            saveManager.CreateSaveSlot(playerSlot);
         }
         
-        // Register this object
-        saveManager.RegisterObjectIntoSlot("PlayerSave", this);
+        saveManager.RegisterObjectIntoSlot(playerSlot, this);
         
         // Load existing data
-        saveManager.LoadFromSaveSlot("PlayerSave");
+        var progress = new Progress<SaveProgress>(p => 
+            Debug.Log($"Loading player: {p.Percentage:P}")
+        );
+        
+        _ = LoadPlayerDataAsync(playerSlot, progress);
     }
     
-    public string GetSaveID() => "Player_" + gameObject.name;
+    private async Task LoadPlayerDataAsync(string slotName, IProgress<SaveProgress> progress) {
+        var slot = saveManager.GetSaveSlot(slotName);
+        bool loaded = await slot.LoadAllAsync(progress);
+        
+        if (!loaded) {
+            Debug.Log("No existing save found, starting new game");
+            SetDefaultValues();
+        }
+    }
     
-    // Save when player levels up
+    public string GetSaveID() => "RPGPlayer_Main";
+    
+    public void OnDataLoaded() {
+        // Apply loaded position
+        transform.position = position;
+        
+        // Update UI
+        UpdateHealthBar();
+        UpdateManaBar();
+        UpdateLevelDisplay();
+        
+        // Load correct scene if different
+        if (SceneManager.GetActiveScene().name != currentScene) {
+            SceneManager.LoadScene(currentScene);
+        }
+        
+        // Validate data integrity
+        ValidatePlayerData();
+        
+        Debug.Log($"Player loaded: Level {level}, {experience} XP, at {position}");
+    }
+    
+    private void ValidatePlayerData() {
+        health = Mathf.Clamp(health, 1, GetMaxHealth());
+        mana = Mathf.Clamp(mana, 0, GetMaxMana());
+        level = Mathf.Max(1, level);
+    }
+    
+    // Save on important events
     public void LevelUp() {
         level++;
         experience = 0f;
-        saveManager.SaveToSaveSlot("PlayerSave");
+        SavePlayerData();
     }
+    
+    public void SavePlayerData() {
+        position = transform.position;
+        currentScene = SceneManager.GetActiveScene().name;
+        
+        string playerSlot = $"Player_{PlayerPrefs.GetString("PlayerName", "Default")}";
+        saveManager.SaveToSaveSlot(playerSlot);
+    }
+}
+
+[System.Serializable]
+public class GameSettings {
+    [Saveable] public float masterVolume = 1.0f;
+    [Saveable] public float sfxVolume = 1.0f;
+    [Saveable] public bool enableVSync = true;
+    [Saveable] public int graphicsQuality = 2;
 }</div>
 
-        <h3>Multi-Slot Game Save System</h3>
-        <div class="code-block">public class GameManager : MonoBehaviour {
-    private SaveSlotsManager saveManager;
+        <h3>2. Multi-User Save System</h3>
+        <div class="code-block">public class MultiUserSaveManager : MonoBehaviour {
+    [SerializeField] private SaveSlotsManager saveManager;
+    [SerializeField] private int maxSaveSlots = 5;
+    
+    private Dictionary<string, UserProfile> userProfiles = new();
     
     void Start() {
-        saveManager = FindObjectOfType<SaveSlotsManager>();
+        LoadAllUserProfiles();
+    }
+    
+    public async Task<bool> CreateUserProfile(string username, string displayName) {
+        if (string.IsNullOrEmpty(username) || userProfiles.ContainsKey(username)) {
+            return false;
+        }
         
-        // Create multiple save slots
-        for (int i = 1; i <= 3; i++) {
-            string slotName = "GameSlot" + i;
-            if (!saveManager.DoesSaveSlotExist(slotName)) {
-                saveManager.CreateSaveSlot(slotName);
+        // Validate save slot name
+        if (!saveManager.IsValidSaveSlotName(username)) {
+            Debug.LogError("Invalid username for save system");
+            return false;
+        }
+        
+        // Create save slots for this user
+        string mainSlot = $"User_{username}_Main";
+        string backupSlot = $"User_{username}_Backup";
+        string settingsSlot = $"User_{username}_Settings";
+        
+        saveManager.CreateSaveSlot(mainSlot);
+        saveManager.CreateSaveSlot(backupSlot);
+        saveManager.CreateSaveSlot(settingsSlot);
+        
+        // Create user profile
+        var profile = new UserProfile {
+            Username = username,
+            DisplayName = displayName,
+            CreatedDate = System.DateTime.Now,
+            LastPlayedDate = System.DateTime.Now,
+            MainSaveSlot = mainSlot,
+            BackupSaveSlot = backupSlot,
+            SettingsSlot = settingsSlot
+        };
+        
+        userProfiles[username] = profile;
+        
+        // Save user profiles list
+        await SaveUserProfilesAsync();
+        
+        return true;
+    }
+    
+    public async Task<bool> SwitchToUser(string username) {
+        if (!userProfiles.ContainsKey(username)) {
+            return false;
+        }
+        
+        var profile = userProfiles[username];
+        
+        // Update last played
+        profile.LastPlayedDate = System.DateTime.Now;
+        
+        // Load user's main save
+        var progress = new Progress<SaveProgress>(p => 
+            Debug.Log($"Loading {profile.DisplayName}: {p.Phase}")
+        );
+        
+        var mainSlot = saveManager.GetSaveSlot(profile.MainSaveSlot);
+        bool loaded = await mainSlot.LoadAllAsync(progress);
+        
+        if (loaded) {
+            PlayerPrefs.SetString("CurrentUser", username);
+            Debug.Log($"Switched to user: {profile.DisplayName}");
+        }
+        
+        return loaded;
+    }
+    
+    public async Task BackupCurrentUser() {
+        string currentUser = PlayerPrefs.GetString("CurrentUser", "");
+        if (string.IsNullOrEmpty(currentUser) || !userProfiles.ContainsKey(currentUser)) {
+            return;
+        }
+        
+        var profile = userProfiles[currentUser];
+        
+        // Save current state to main slot
+        var mainSlot = saveManager.GetSaveSlot(profile.MainSaveSlot);
+        await mainSlot.SaveAllAsync();
+        
+        // Copy main slot data to backup slot
+        var backupSlot = saveManager.GetSaveSlot(profile.BackupSaveSlot);
+        
+        // Register same objects to backup slot
+        foreach (var saveable in GetAllSaveableObjects()) {
+            backupSlot.Register(saveable);
+        }
+        
+        await backupSlot.SaveAllAsync();
+        
+        Debug.Log($"Backup created for user: {profile.DisplayName}");
+    }
+    
+    private async Task SaveUserProfilesAsync() {
+        // Save user profiles to a special system slot
+        if (!saveManager.DoesSaveSlotExist("UserProfiles")) {
+            saveManager.CreateSaveSlot("UserProfiles");
+        }
+        
+        var profileData = new UserProfileData { Profiles = userProfiles };
+        var systemSlot = saveManager.GetSaveSlot("UserProfiles");
+        
+        // Manually save profile data (since it's not a MonoBehaviour)
+        string json = JsonConvert.SerializeObject(profileData);
+        System.IO.File.WriteAllText(
+            System.IO.Path.Combine(Application.persistentDataPath, "user_profiles.json"), 
+            json
+        );
+    }
+    
+    private void LoadAllUserProfiles() {
+        string profilePath = System.IO.Path.Combine(Application.persistentDataPath, "user_profiles.json");
+        
+        if (System.IO.File.Exists(profilePath)) {
+            string json = System.IO.File.ReadAllText(profilePath);
+            var profileData = JsonConvert.DeserializeObject<UserProfileData>(json);
+            userProfiles = profileData.Profiles ?? new Dictionary<string, UserProfile>();
+        }
+    }
+    
+    private List<ISaveableData> GetAllSaveableObjects() {
+        var saveables = new List<ISaveableData>();
+        
+#if UNITY_2023_1_OR_NEWER
+        var objects = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+#else
+        var objects = Object.FindObjectsOfType<MonoBehaviour>();
+#endif
+        
+        foreach (var obj in objects) {
+            if (obj is ISaveableData saveable) {
+                saveables.Add(saveable);
+            }
+        }
+        
+        return saveables;
+    }
+}
+
+[System.Serializable]
+public class UserProfile {
+    public string Username;
+    public string DisplayName;
+    public System.DateTime CreatedDate;
+    public System.DateTime LastPlayedDate;
+    public string MainSaveSlot;
+    public string BackupSaveSlot;
+    public string SettingsSlot;
+    public int PlayTimeMinutes;
+}
+
+[System.Serializable]
+public class UserProfileData {
+    public Dictionary<string, UserProfile> Profiles;
+}</div>
+
+        <h3>3. Advanced Scene Management System</h3>
+        <div class="code-block">public class SceneDataManager : MonoBehaviour, ISaveableData {
+    public int LoadOrder => -100; // Load first
+    
+    [Saveable] public string currentSceneName;
+    [Saveable] public Vector3 playerSpawnPoint;
+    [Saveable] public Dictionary<string, bool> unlockedAreas = new();
+    [Saveable] public List<string> completedObjectives = new();
+    [Saveable] public Dictionary<string, SceneState> sceneStates = new();
+    
+    private SaveSlotsManager saveManager;
+    
+    void Awake() {
+        // Singleton pattern
+        if (FindObjectsOfType<SceneDataManager>().Length > 1) {
+            Destroy(gameObject);
+            return;
+        }
+        
+        DontDestroyOnLoad(gameObject);
+        saveManager = FindObjectOfType<SaveSlotsManager>();
+    }
+    
+    void Start() {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
+    }
+    
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+        currentSceneName = scene.name;
+        
+        // Register all saveables in new scene
+        saveManager.RegisterEveryObjectIntoSlot("MainGame");
+        
+        // Apply scene-specific state
+        if (sceneStates.ContainsKey(scene.name)) {
+            ApplySceneState(sceneStates[scene.name]);
+        }
+        
+        // Position player at spawn point
+        var player = FindObjectOfType<PlayerController>();
+        if (player != null && playerSpawnPoint != Vector3.zero) {
+            player.transform.position = playerSpawnPoint;
+        }
+    }
+    
+    private void OnSceneUnloaded(Scene scene) {
+        // Save scene state before unloading
+        SaveSceneState(scene.name);
+        
+        // Quick save before scene change
+        saveManager.SaveToSaveSlot("MainGame");
+    }
+    
+    public void SaveSceneState(string sceneName) {
+        var state = new SceneState {
+            SceneName = sceneName,
+            DestroyedObjects = GetDestroyedObjectIds(),
+            CollectedItems = GetCollectedItemIds(),
+            ActivatedSwitches = GetActivatedSwitchIds(),
+            CompletedPuzzles = GetCompletedPuzzleIds()
+        };
+        
+        sceneStates[sceneName] = state;
+    }
+    
+    public void ApplySceneState(SceneState state) {
+        // Destroy objects that should be destroyed
+        foreach (string objId in state.DestroyedObjects) {
+            var obj = GameObject.Find(objId);
+            if (obj != null) {
+                obj.SetActive(false);
+            }
+        }
+        
+        // Remove collected items
+        foreach (string itemId in state.CollectedItems) {
+            var item = GameObject.Find(itemId);
+            if (item != null) {
+                item.SetActive(false);
+            }
+        }
+        
+        // Activate switches
+        foreach (string switchId in state.ActivatedSwitches) {
+            var switchObj = GameObject.Find(switchId);
+            if (switchObj != null && switchObj.TryGetComponent<Switch>(out var switchComp)) {
+                switchComp.SetActivated(true);
             }
         }
     }
     
-    public void SaveGame(int slotNumber) {
-        string slotName = "GameSlot" + slotNumber;
-        saveManager.RegisterEveryObjectIntoSlot(slotName);
-        saveManager.SaveToSaveSlot(slotName);
-        Debug.Log($"Game saved to slot {slotNumber}");
+    public void ChangeScene(string sceneName, Vector3 spawnPoint) {
+        // Save current scene state
+        SaveSceneState(currentSceneName);
+        
+        // Set spawn point for new scene
+        playerSpawnPoint = spawnPoint;
+        
+        // Save before scene change
+        saveManager.SaveToSaveSlot("MainGame");
+        
+        // Load new scene
+        SceneManager.LoadScene(sceneName);
     }
     
-    public void LoadGame(int slotNumber) {
-        string slotName = "GameSlot" + slotNumber;
-        saveManager.LoadFromSaveSlot(slotName);
-        Debug.Log($"Game loaded from slot {slotNumber}");
+    public string GetSaveID() => "SceneDataManager_Main";
+    
+    public void OnDataLoaded() {
+        // Scene manager loaded - apply global state
+        if (!string.IsNullOrEmpty(currentSceneName)) {
+            if (SceneManager.GetActiveScene().name != currentSceneName) {
+                SceneManager.LoadScene(currentSceneName);
+            }
+        }
+        
+        Debug.Log($"Scene manager loaded with {sceneStates.Count} scene states");
     }
+    
+    // Helper methods for gathering scene state
+    private List<string> GetDestroyedObjectIds() {
+        var destroyed = new List<string>();
+        // Implementation depends on your object tracking system
+        return destroyed;
+    }
+    
+    private List<string> GetCollectedItemIds() {
+        var collected = new List<string>();
+        var items = FindObjectsOfType<CollectibleItem>();
+        foreach (var item in items) {
+            if (item.IsCollected) {
+                collected.Add(item.gameObject.name);
+            }
+        }
+        return collected;
+    }
+    
+    private List<string> GetActivatedSwitchIds() {
+        var activated = new List<string>();
+        var switches = FindObjectsOfType<Switch>();
+        foreach (var switchObj in switches) {
+            if (switchObj.IsActivated) {
+                activated.Add(switchObj.gameObject.name);
+            }
+        }
+        return activated;
+    }
+    
+    private List<string> GetCompletedPuzzleIds() {
+        var completed = new List<string>();
+        var puzzles = FindObjectsOfType<Puzzle>();
+        foreach (var puzzle in puzzles) {
+            if (puzzle.IsCompleted) {
+                completed.Add(puzzle.gameObject.name);
+            }
+        }
+        return completed;
+    }
+}
+
+[System.Serializable]
+public class SceneState {
+    public string SceneName;
+    public List<string> DestroyedObjects = new();
+    public List<string> CollectedItems = new();
+    public List<string> ActivatedSwitches = new();
+    public List<string> CompletedPuzzles = new();
+}</div>
+
+        <h3>4. Inventory System Integration</h3>
+        <div class="code-block">public class InventoryManager : MonoBehaviour, ISaveableData {
+    public int LoadOrder => 10; // Load after player
+    
+    [Saveable] public List<InventoryItem> items = new();
+    [Saveable] public Dictionary<string, int> itemCounts = new();
+    [Saveable] public int maxSlots = 20;
+    [Saveable] public float totalWeight = 0f;
+    
+    [Header("Equipment")]
+    [Saveable] public EquippedItems equippedItems = new();
+    
+    public UnityEvent<InventoryItem> OnItemAdded;
+    public UnityEvent<InventoryItem> OnItemRemoved;
+    
+    public bool AddItem(InventoryItem item, int quantity = 1) {
+        if (items.Count >= maxSlots) {
+            Debug.Log("Inventory full!");
+            return false;
+        }
+        
+        // Check for stackable items
+        if (item.IsStackable && itemCounts.ContainsKey(item.ID)) {
+            itemCounts[item.ID] += quantity;
+        } else {
+            items.Add(item);
+            itemCounts[item.ID] = quantity;
+        }
+        
+        totalWeight += item.Weight * quantity;
+        OnItemAdded?.Invoke(item);
+        
+        // Auto-save on item pickup
+        AutoSaveInventory();
+        
+        return true;
+    }
+    
+    public bool RemoveItem(string itemID, int quantity = 1) {
+        if (!itemCounts.ContainsKey(itemID)) {
+            return false;
+        }
+        
+        var item = items.Find(i => i.ID == itemID);
+        itemCounts[itemID] -= quantity;
+        totalWeight -= item.Weight * quantity;
+        
+        if (itemCounts[itemID] <= 0) {
+            itemCounts.Remove(itemID);
+            items.RemoveAll(i => i.ID == itemID);
+        }
+        
+        OnItemRemoved?.Invoke(item);
+        AutoSaveInventory();
+        
+        return true;
+    }
+    
+    public void EquipItem(InventoryItem item) {
+        if (!items.Contains(item)) return;
+        
+        // Unequip current item in slot
+        if (equippedItems.GetItemInSlot(item.EquipSlot) != null) {
+            UnequipItem(item.EquipSlot);
+        }
+        
+        // Equip new item
+        equippedItems.SetItemInSlot(item.EquipSlot, item);
+        RemoveItem(item.ID, 1);
+        
+        // Apply item stats
+        ApplyItemEffects(item, true);
+        
+        AutoSaveInventory();
+    }
+    
+    public void UnequipItem(EquipSlot slot) {
+        var item = equippedItems.GetItemInSlot(slot);
+        if (item == null) return;
+        
+        // Remove item effects
+        ApplyItemEffects(item, false);
+        
+        // Add back to inventory
+        AddItem(item, 1);
+        equippedItems.SetItemInSlot(slot, null);
+        
+        AutoSaveInventory();
+    }
+    
+    private void ApplyItemEffects(InventoryItem item, bool apply) {
+        var player = FindObjectOfType<PlayerController>();
+        if (player == null) return;
+        
+        int multiplier = apply ? 1 : -1;
+        
+        player.ModifyStats(new StatModifier {
+            Health = item.HealthBonus * multiplier,
+            Mana = item.ManaBonus * multiplier,
+            Damage = item.DamageBonus * multiplier,
+            Defense = item.DefenseBonus * multiplier
+        });
+    }
+    
+    private void AutoSaveInventory() {
+        // Save to dedicated inventory slot for quick saves
+        var saveManager = FindObjectOfType<SaveSlotsManager>();
+        if (saveManager != null) {
+            saveManager.SaveToSaveSlot("PlayerInventory");
+        }
+    }
+    
+    public string GetSaveID() => "InventoryManager_Main";
+    
+    public void OnDataLoaded() {
+        // Recalculate total weight after loading
+        totalWeight = 0f;
+        foreach (var item in items) {
+            totalWeight += item.Weight * itemCounts.GetValueOrDefault(item.ID, 1);
+        }
+        
+        // Re-apply equipped item effects
+        foreach (var equippedItem in equippedItems.GetAllEquippedItems()) {
+            if (equippedItem != null) {
+                ApplyItemEffects(equippedItem, true);
+            }
+        }
+        
+        Debug.Log($"Inventory loaded: {items.Count} items, {totalWeight:F1} weight");
+    }
+}
+
+[System.Serializable]
+public class InventoryItem {
+    public string ID;
+    public string Name;
+    public string Description;
+    public float Weight;
+    public bool IsStackable;
+    public EquipSlot EquipSlot;
+    
+    [Header("Stat Bonuses")]
+    public int HealthBonus;
+    public int ManaBonus;
+    public int DamageBonus;
+    public int DefenseBonus;
+}
+
+[System.Serializable]
+public class EquippedItems {
+    [Saveable] public InventoryItem weapon;
+    [Saveable] public InventoryItem armor;
+    [Saveable] public InventoryItem accessory;
+    
+    public InventoryItem GetItemInSlot(EquipSlot slot) {
+        return slot switch {
+            EquipSlot.Weapon => weapon,
+            EquipSlot.Armor => armor,
+            EquipSlot.Accessory => accessory,
+            _ => null
+        };
+    }
+    
+    public void SetItemInSlot(EquipSlot slot, InventoryItem item) {
+        switch (slot) {
+            case EquipSlot.Weapon: weapon = item; break;
+            case EquipSlot.Armor: armor = item; break;
+            case EquipSlot.Accessory: accessory = item; break;
+        }
+    }
+    
+    public List<InventoryItem> GetAllEquippedItems() {
+        return new List<InventoryItem> { weapon, armor, accessory }
+            .Where(item => item != null).ToList();
+    }
+}
+
+public enum EquipSlot {
+    None, Weapon, Armor, Accessory
 }</div>
     </div>
 
     <div class="section">
         <h2>🔒 Security Features</h2>
         <ul>
-            <li><strong>AES Encryption:</strong> All save files are encrypted with unique keys</li>
-            <li><strong>Key Management:</strong> Encryption keys are stored separately from save data</li>
-            <li><strong>File Validation:</strong> Save slot names are validated against file system attacks</li>
-            <li><strong>GZIP Compression:</strong> Reduces file size and adds obfuscation</li>
+            <li><strong>AES-256 Encryption:</strong> Military-grade encryption with unique IVs for each save</li>
+            <li><strong>Secure Key Management:</strong> Encryption keys stored separately from save data</li>
+            <li><strong>Path Traversal Protection:</strong> Save slot names validated against directory traversal attacks</li>
+            <li><strong>GZIP Compression:</strong> Reduces file size and adds obfuscation layer</li>
+            <li><strong>Backward Compatibility:</strong> Automatically detects and loads saves with different security settings</li>
         </ul>
     </div>
 
     <div class="section">
         <h2>⚡ Performance Features</h2>
         <ul>
-            <li><strong>Load Order Management:</strong> Control initialization sequence</li>
-            <li><strong>Selective Field Saving:</strong> Only marked fields are processed</li>
-            <li><strong>Compression:</strong> Faster I/O with smaller files</li>
-            <li><strong>Batch Operations:</strong> Efficient multi-object save/load</li>
+            <li><strong>Async Operations:</strong> Non-blocking save/load with cancellation support</li>
+            <li><strong>Load Order Management:</strong> Precise control over initialization sequence</li>
+            <li><strong>Selective Field Saving:</strong> Only [Saveable] marked fields are processed</li>
+            <li><strong>Progress Reporting:</strong> Real-time progress updates for long operations</li>
+            <li><strong>Batch Operations:</strong> Efficient multi-object and multi-slot operations</li>
+            <li><strong>Memory Optimization:</strong> Streaming I/O and background processing</li>
         </ul>
     </div>
 
     <div class="section">
         <h2>🎯 Best Practices</h2>
         <ul>
-            <li>Use meaningful GetSaveID() implementations to avoid conflicts</li>
-            <li>Set appropriate LoadOrder for dependencies (managers load before dependents)</li>
-            <li>Mark only necessary fields with [Saveable] for performance</li>
-            <li>Use AutoSave component for critical data protection</li>
-            <li>Validate save slot names in UI to prevent errors</li>
+            <li><strong>Unique Save IDs:</strong> Use meaningful GetSaveID() implementations to avoid conflicts</li>
+            <li><strong>Load Order Dependencies:</strong> Set appropriate LoadOrder values (managers: -100, objects: 0, UI: 50+)</li>
+            <li><strong>Selective Saving:</strong> Mark only necessary fields with [Saveable] for optimal performance</li>
+            <li><strong>Auto-Save Strategy:</strong> Use AutoSave component for critical data protection</li>
+            <li><strong>Input Validation:</strong> Always validate save slot names in UI to prevent errors</li>
+            <li><strong>Progress Feedback:</strong> Implement progress reporting for better user experience</li>
+            <li><strong>Error Handling:</strong> Use try-catch blocks and cancellation tokens for robust operations</li>
+            <li><strong>Data Validation:</strong> Implement OnDataLoaded() to validate and sanitize loaded data</li>
         </ul>
     </div>
 
+    <div class="section">
+        <h2>📋 JSON Converter Support</h2>
+        <p>The system includes comprehensive Unity type converters for seamless serialization:</p>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Vector Types</h3>
+                <ul>
+                    <li>Vector2, Vector3, Vector4</li>
+                    <li>Vector2Int, Vector3Int</li>
+                    <li>Quaternion</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>Graphics Types</h3>
+                <ul>
+                    <li>Color, Color32</li>
+                    <li>Rect, RectInt</li>
+                    <li>Bounds, BoundsInt</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>Advanced Types</h3>
+                <ul>
+                    <li>Matrix4x4</li>
+                    <li>Ray, Ray2D, Plane</li>
+                    <li>AnimationCurve, Gradient</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #6c757d;">
-        <p>Unity Advanced Save System - Complete solution for game data persistence</p>
+        <p>Unity Advanced Save System v2.0 - Complete solution for game data persistence with async operations, encryption, and progress tracking</p>
     </footer>
 </body>
 </html>
