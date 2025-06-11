@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unity Save System - Complete Documentation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -360,6 +361,17 @@
         .section:last-child {
             border-bottom: none;
         }
+
+        /* Lists */
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.25rem;
+            color: var(--text-secondary);
+        }
     </style>
 </head>
 <body>
@@ -375,7 +387,6 @@
                 <h3>Getting Started</h3>
                 <ul class="nav-list">
                     <li><a href="#overview" class="active">Overview</a></li>
-                    <li><a href="#installation">Installation</a></li>
                     <li><a href="#quick-start">Quick Start</a></li>
                     <li><a href="#features">Features</a></li>
                 </ul>
@@ -397,7 +408,6 @@
                     <li><a href="#encryption">Encryption</a></li>
                     <li><a href="#compression">Compression</a></li>
                     <li><a href="#unity-types">Unity Types</a></li>
-                    <li><a href="#error-handling">Error Handling</a></li>
                 </ul>
             </div>
 
@@ -405,8 +415,7 @@
                 <h3>Examples</h3>
                 <ul class="nav-list">
                     <li><a href="#basic-examples">Basic Usage</a></li>
-                    <li><a href="#advanced-examples">Advanced Examples</a></li>
-                    <li><a href="#ui-examples">UI Integration</a></li>
+                    <li><a href="#api-reference">API Reference</a></li>
                 </ul>
             </div>
         </nav>
@@ -443,32 +452,24 @@
                     </div>
                 </div>
             </section>
+
             <section id="quick-start" class="section">
                 <h2>Quick Start</h2>
                 
                 <h3>1. Add Setup Wizard</h3>
-                <p>Add the <code>SetupWizard</code> component to any GameObject in your first scene:</p>
+                <p>Add the <code>SetupWizard</code> component to any GameObject in your first scene and configure the settings in the inspector.</p>
                 
                 <div class="code-container">
                     <div class="code-header">
                         <span class="language-label">C#</span>
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
-                    <pre><code class="language-csharp">using SaveLoadSystem;
-using UnityEngine;
-
-public class GameInitializer : MonoBehaviour
+                    <pre><code class="language-csharp">// Create or use existing save slot
+if (!DataManager.DoesSlotExist("MainSave"))
 {
-    private void Awake()
-    {
-        // Create or use existing save slot
-        if (!DataManager.DoesSlotExist("MainSave"))
-        {
-            DataManager.CreateSaveSlot("MainSave");
-        }
-        DataManager.SetActiveSlot("MainSave");
-    }
-}</code></pre>
+    DataManager.CreateSaveSlot("MainSave");
+}
+DataManager.SetActiveSlot("MainSave");</code></pre>
                 </div>
 
                 <h3>2. Save Data</h3>
@@ -480,16 +481,7 @@ public class GameInitializer : MonoBehaviour
                     <pre><code class="language-csharp">// Save simple values
 DataManager.Save("PlayerLevel", 42);
 DataManager.Save("PlayerName", "John Doe");
-DataManager.Save("PlayerPosition", transform.position);
-
-// Save complex objects
-var playerData = new PlayerData
-{
-    Health = 100,
-    Experience = 1500,
-    Inventory = new List&lt;string&gt; { "Sword", "Potion", "Key" }
-};
-DataManager.Save("PlayerData", playerData);</code></pre>
+DataManager.Save("PlayerPosition", transform.position);</code></pre>
                 </div>
 
                 <h3>3. Load Data</h3>
@@ -501,16 +493,7 @@ DataManager.Save("PlayerData", playerData);</code></pre>
                     <pre><code class="language-csharp">// Load simple values
 int level = DataManager.Load&lt;int&gt;("PlayerLevel");
 string name = DataManager.Load&lt;string&gt;("PlayerName");
-Vector3 position = DataManager.Load&lt;Vector3&gt;("PlayerPosition");
-
-// Load complex objects
-PlayerData playerData = DataManager.Load&lt;PlayerData&gt;("PlayerData");
-if (playerData != null)
-{
-    // Use loaded data
-    health = playerData.Health;
-    experience = playerData.Experience;
-}</code></pre>
+Vector3 position = DataManager.Load&lt;Vector3&gt;("PlayerPosition");</code></pre>
                 </div>
             </section>
 
@@ -577,6 +560,11 @@ if (playerData != null)
                             <td><code>DataManager.DeleteSaveSlot("Player1");</code></td>
                         </tr>
                         <tr>
+                            <td><code>RenameSaveSlot(string oldName, string newName)</code></td>
+                            <td>Renames an existing save slot</td>
+                            <td><code>DataManager.RenameSaveSlot("Old", "New");</code></td>
+                        </tr>
+                        <tr>
                             <td><code>SetActiveSlot(string name)</code></td>
                             <td>Changes the active save slot</td>
                             <td><code>DataManager.SetActiveSlot("Player2");</code></td>
@@ -597,7 +585,7 @@ if (playerData != null)
 
             <section id="saveslot" class="section">
                 <h2>SaveSlot Class</h2>
-                <p>The <code>SaveSlot</code> class represents an individual save file. Each slot can have its own encryption and compression settings.</p>
+                <p>The <code>SaveSlot</code> class represents an individual save file. Each slot can have its own configuration set through the Setup Wizard.</p>
 
                 <h3>Properties</h3>
                 <table class="api-table">
@@ -618,21 +606,6 @@ if (playerData != null)
                             <td><code>SavePath</code></td>
                             <td><code>string</code></td>
                             <td>Full file path to the save file</td>
-                        </tr>
-                        <tr>
-                            <td><code>UseCompression</code></td>
-                            <td><code>bool</code></td>
-                            <td>Whether to use GZIP compression</td>
-                        </tr>
-                        <tr>
-                            <td><code>UseEncryption</code></td>
-                            <td><code>bool</code></td>
-                            <td>Whether to use AES encryption</td>
-                        </tr>
-                        <tr>
-                            <td><code>EncryptionKey</code></td>
-                            <td><code>byte[]</code></td>
-                            <td>The encryption key (auto-generated if null)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -670,103 +643,66 @@ if (playerData != null)
                 </table>
             </section>
 
-            <section id="encryption" class="section">
-                <h2>Encryption</h2>
-                <p>The save system includes AES encryption to protect save data from tampering. Encryption is applied before compression.</p>
+            <section id="setupwizard" class="section">
+                <h2>Setup Wizard</h2>
+                <p>The <code>SetupWizard</code> component configures global settings for the save system. Add it to a GameObject in your first scene and configure the settings in the inspector.</p>
 
-                <h3>Enabling Encryption</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Enable encryption when creating a save slot
-SaveSlot encryptedSlot = new SaveSlot("SecureData", useCompression: false, useEncryption: true);
-
-// Or modify an existing slot
-var activeSlot = DataManager.GetSaveSlots().First();
-activeSlot.UseEncryption = true;
-activeSlot.EncryptionKey = EncryptionUtility.GenerateKey(); // Auto-generated if null</code></pre>
-                </div>
-
-                <h3>Encryption Utilities</h3>
+                <h3>Configuration Options</h3>
                 <table class="api-table">
                     <thead>
                         <tr>
-                            <th>Method</th>
+                            <th>Setting</th>
+                            <th>Options</th>
                             <th>Description</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>EncryptionUtility.GenerateKey()</code></td>
-                            <td>Generates a new random AES key</td>
+                            <td><code>LogLevel</code></td>
+                            <td>None, Minimal, Detailed</td>
+                            <td>Controls how much logging information is displayed</td>
                         </tr>
                         <tr>
-                            <td><code>EncryptionUtility.Encrypt(byte[] data, byte[] key)</code></td>
-                            <td>Encrypts data with the provided key</td>
+                            <td><code>Compression</code></td>
+                            <td>None, GZIP</td>
+                            <td>Compression method applied to all save operations</td>
                         </tr>
                         <tr>
-                            <td><code>EncryptionUtility.Decrypt(byte[] data, byte[] key)</code></td>
-                            <td>Decrypts data with the provided key</td>
+                            <td><code>Encryption</code></td>
+                            <td>None, AES</td>
+                            <td>Encryption method applied to all save operations</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <div class="alert alert-warning">
-                    <strong>Important:</strong> Store encryption keys securely! If the key is lost, save data cannot be recovered.
+                <h3>Basic Setup</h3>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="language-label">C#</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-csharp">// Simply add the SetupWizard component to a GameObject
+// Configure settings in the inspector
+// The component will automatically initialize the save system</code></pre>
+                </div>
+            </section>
+
+            <section id="encryption" class="section">
+                <h2>Encryption</h2>
+                <p>The <code>EncryptionUtility</code> class provides AES encryption functionality to protect save data from tampering. Encryption is configured globally through the Setup Wizard and applied automatically to all save operations when enabled.</p>
+
+                <div class="alert alert-info">
+                    <strong>Note:</strong> Encryption settings are configured through the Setup Wizard component and applied via dependency injection to all save operations.
                 </div>
             </section>
 
             <section id="compression" class="section">
                 <h2>Compression</h2>
-                <p>GZIP compression can significantly reduce save file sizes, especially for text-heavy data like JSON.</p>
+                <p>The <code>GZIP</code> class provides compression functionality to reduce save file sizes. Compression is configured globally through the Setup Wizard and applied automatically to all save operations when enabled.</p>
 
-                <h3>Enabling Compression</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Enable compression when creating a save slot
-SaveSlot compressedSlot = new SaveSlot("CompressedData", useCompression: true);
-
-// Or modify an existing slot
-var activeSlot = DataManager.GetSaveSlots().First();
-activeSlot.UseCompression = true;</code></pre>
+                <div class="alert alert-info">
+                    <strong>Note:</strong> Compression settings are configured through the Setup Wizard component and applied via dependency injection to all save operations.
                 </div>
-
-                <h3>Compression Performance</h3>
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <h4>📊 Typical Savings</h4>
-                        <p>JSON text compresses by 60-80% on average, with larger files seeing better compression ratios.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>⚡ Load Times</h4>
-                        <p>Smaller files mean faster disk I/O, often outweighing decompression overhead.</p>
-                    </div>
-                </div>
-
-                <h3>Compression Utilities</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Method</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>GZIP.Compress(string text)</code></td>
-                            <td>Compresses a string to byte array</td>
-                        </tr>
-                        <tr>
-                            <td><code>GZIP.Decompress(byte[] compressed)</code></td>
-                            <td>Decompresses byte array back to string</td>
-                        </tr>
-                    </tbody>
-                </table>
             </section>
 
             <section id="unity-types" class="section">
@@ -774,30 +710,6 @@ activeSlot.UseCompression = true;</code></pre>
                 <p>The save system includes custom JSON converters for all major Unity types, ensuring seamless serialization.</p>
 
                 <h3>Supported Unity Types</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Math types
-DataManager.Save("Position", new Vector3(1, 2, 3));
-DataManager.Save("Rotation", Quaternion.Euler(45, 0, 0));
-DataManager.Save("Size", new Vector2(100, 50));
-
-// Color types
-DataManager.Save("PlayerColor", Color.red);
-DataManager.Save("UIColor", new Color32(255, 128, 0, 255));
-
-// Geometry types
-DataManager.Save("ViewRect", new Rect(0, 0, 1920, 1080));
-DataManager.Save("Bounds", new Bounds(Vector3.zero, Vector3.one));
-
-// Advanced types
-DataManager.Save("AnimCurve", AnimationCurve.EaseInOut(0, 0, 1, 1));
-DataManager.Save("ColorGradient", new Gradient());
-DataManager.Save("Transform", Matrix4x4.identity);</code></pre>
-                </div>
-
                 <table class="api-table">
                     <thead>
                         <tr>
@@ -834,1305 +746,83 @@ DataManager.Save("Transform", Matrix4x4.identity);</code></pre>
                 </table>
             </section>
 
-            <section id="error-handling" class="section">
-                <h2>Error Handling</h2>
-                <p>The save system includes comprehensive error handling and logging to help debug issues.</p>
-
-                <h3>Custom Logger</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Configure logging level
-CustomLogger.CurrentLogLevel = LogLevel.Detailed; // Shows all messages
-CustomLogger.CurrentLogLevel = LogLevel.Minimal;  // Warnings and errors only
-CustomLogger.CurrentLogLevel = LogLevel.None;     // Errors only
-
-// Manual logging
-CustomLogger.LogInfo("Save operation completed");
-CustomLogger.LogWarning("Save slot already exists");
-CustomLogger.LogError("Failed to write save file");</code></pre>
-                </div>
-
-                <h3>Error Recovery</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Load with fallback values
-int playerLevel = DataManager.Load&lt;int&gt;("PlayerLevel");
-if (playerLevel == 0) // Default value indicates load failure
-{
-    playerLevel = 1; // Fallback to level 1
-    DataManager.Save("PlayerLevel", playerLevel); // Save corrected value
-}
-
-// Check if data exists before loading complex objects
-if (DataManager.DoesSlotExist("MainSave"))
-{
-    PlayerData data = DataManager.Load&lt;PlayerData&gt;("PlayerData");
-    if (data != null)
-    {
-        // Successfully loaded
-        ApplyPlayerData(data);
-    }
-    else
-    {
-        // Failed to load, create new data
-        CreateNewPlayerData();
-    }
-}</code></pre>
-                </div>
-
-                <div class="alert alert-info">
-                    <strong>Atomic Operations:</strong> All save operations use atomic writes (temp file → rename) to prevent corruption if the game crashes during saving.
-                </div>
-            </section>
-
             <section id="basic-examples" class="section">
                 <h2>Basic Examples</h2>
 
-                <h3>Player Progression System</h3>
+                <h3>Save Player Progress</h3>
                 <div class="code-container">
                     <div class="code-header">
                         <span class="language-label">C#</span>
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
-                    <pre><code class="language-csharp">using SaveLoadSystem;
-using UnityEngine;
+                    <pre><code class="language-csharp">// Save player level
+DataManager.Save("PlayerLevel", currentLevel);
 
-[System.Serializable]
-public class PlayerStats
-{
-    public int Level = 1;
-    public int Experience = 0;
-    public int Health = 100;
-    public int Mana = 50;
-    public Vector3 LastPosition = Vector3.zero;
-}
-
-public class PlayerController : MonoBehaviour
-{
-    [SerializeField] private PlayerStats stats;
-    
-    private void Start()
-    {
-        // Initialize save system
-        if (!DataManager.DoesSlotExist("PlayerSave"))
-        {
-            DataManager.CreateSaveSlot("PlayerSave");
-        }
-        DataManager.SetActiveSlot("PlayerSave");
-        
-        // Load player stats
-        LoadPlayerData();
-    }
-    
-    private void LoadPlayerData()
-    {
-        stats = DataManager.Load&lt;PlayerStats&gt;("PlayerStats");
-        if (stats == null)
-        {
-            stats = new PlayerStats(); // Create default stats
-            SavePlayerData(); // Save defaults
-        }
-        
-        // Apply loaded data
-        transform.position = stats.LastPosition;
-        UpdateUI();
-    }
-    
-    private void SavePlayerData()
-    {
-        stats.LastPosition = transform.position;
-        DataManager.Save("PlayerStats", stats);
-    }
-    
-    public void GainExperience(int amount)
-    {
-        stats.Experience += amount;
-        CheckLevelUp();
-        SavePlayerData(); // Auto-save on progression
-    }
-    
-    private void CheckLevelUp()
-    {
-        int requiredExp = stats.Level * 100;
-        if (stats.Experience >= requiredExp)
-        {
-            stats.Level++;
-            stats.Health += 10; // Level up bonus
-            stats.Mana += 5;
-            Debug.Log($"Level up! Now level {stats.Level}");
-        }
-    }
-    
-    private void OnApplicationPause(bool pauseStatus)
-    {
-        if (pauseStatus) SavePlayerData(); // Save when app is paused
-    }
-}</code></pre>
+// Load player level
+int level = DataManager.Load&lt;int&gt;("PlayerLevel");</code></pre>
                 </div>
 
-                <h3>Settings System</h3>
+                <h3>Save Custom Objects</h3>
                 <div class="code-container">
                     <div class="code-header">
                         <span class="language-label">C#</span>
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
-                    <pre><code class="language-csharp">using SaveLoadSystem;
-using UnityEngine;
-using UnityEngine.Audio;
+                    <pre><code class="language-csharp">// Save custom class
+PlayerData playerData = new PlayerData { Health = 100, Experience = 1500 };
+DataManager.Save("PlayerData", playerData);
 
-[System.Serializable]
-public class GameSettings
-{
-    public float MasterVolume = 1.0f;
-    public float SFXVolume = 1.0f;
-    public float MusicVolume = 1.0f;
-    public int QualityLevel = 2;
-    public bool Fullscreen = true;
-    public Resolution Resolution = new Resolution { width = 1920, height = 1080 };
-    public KeyCode JumpKey = KeyCode.Space;
-    public KeyCode InteractKey = KeyCode.E;
-}
-
-public class SettingsManager : MonoBehaviour
-{
-    [SerializeField] private AudioMixer audioMixer;
-    [SerializeField] private GameSettings settings;
-    
-    public static SettingsManager Instance { get; private set; }
-    
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            LoadSettings();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-    
-    private void LoadSettings()
-    {
-        // Use a dedicated settings slot
-        if (!DataManager.DoesSlotExist("Settings"))
-        {
-            DataManager.CreateSaveSlot("Settings");
-        }
-        
-        var currentSlot = DataManager.GetSaveSlots().FirstOrDefault(s => s.Name == "Settings");
-        if (currentSlot != null)
-        {
-            DataManager.SetActiveSlot("Settings");
-            settings = DataManager.Load&lt;GameSettings&gt;("GameSettings");
-        }
-        
-        if (settings == null)
-        {
-            settings = new GameSettings(); // Use defaults
-        }
-        
-        ApplySettings();
-    }
-    
-    public void SaveSettings()
-    {
-        DataManager.SetActiveSlot("Settings");
-        DataManager.Save("GameSettings", settings);
-    }
-    
-    private void ApplySettings()
-    {
-        // Audio
-        audioMixer.SetFloat("MasterVolume", Mathf.Log10(settings.MasterVolume) * 20);
-        audioMixer.SetFloat("SFXVolume", Mathf.Log10(settings.SFXVolume) * 20);
-        audioMixer.SetFloat("MusicVolume", Mathf.Log10(settings.MusicVolume) * 20);
-        
-        // Graphics
-        QualitySettings.SetQualityLevel(settings.QualityLevel);
-        Screen.SetResolution(settings.Resolution.width, settings.Resolution.height, settings.Fullscreen);
-    }
-    
-    // Public methods for UI to call
-    public void SetMasterVolume(float volume)
-    {
-        settings.MasterVolume = volume;
-        audioMixer.SetFloat("MasterVolume", Mathf.Log10(volume) * 20);
-        SaveSettings();
-    }
-    
-    public void SetQuality(int level)
-    {
-        settings.QualityLevel = level;
-        QualitySettings.SetQualityLevel(level);
-        SaveSettings();
-    }
-}</code></pre>
+// Load custom class
+PlayerData loadedData = DataManager.Load&lt;PlayerData&gt;("PlayerData");</code></pre>
                 </div>
-            </section>
 
-            <section id="advanced-examples" class="section">
-                <h2>Advanced Examples</h2>
-
-                <h3>Inventory System with Custom Types</h3>
+                <h3>Save Unity Types</h3>
                 <div class="code-container">
                     <div class="code-header">
                         <span class="language-label">C#</span>
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
-                    <pre><code class="language-csharp">using System.Collections.Generic;
-using SaveLoadSystem;
-using UnityEngine;
+                    <pre><code class="language-csharp">// Save Unity types
+DataManager.Save("PlayerPosition", transform.position);
+DataManager.Save("PlayerColor", playerRenderer.material.color);
 
-[System.Serializable]
-public class Item
-{
-    public string ID;
-    public string Name;
-    public int Quantity;
-    public Color Rarity;
-    public Vector2 IconPosition;
-    public Dictionary&lt;string, object&gt; Properties = new Dictionary&lt;string, object&gt;();
-}
-
-[System.Serializable]
-public class Inventory
-{
-    public List&lt;Item&gt; Items = new List&lt;Item&gt;();
-    public int MaxSlots = 30;
-    public Vector2Int GridSize = new Vector2Int(6, 5);
-    
-    public bool AddItem(Item item)
-    {
-        if (Items.Count >= MaxSlots) return false;
-        
-        // Try to stack with existing item
-        var existingItem = Items.Find(i => i.ID == item.ID);
-        if (existingItem != null)
-        {
-            existingItem.Quantity += item.Quantity;
-        }
-        else
-        {
-            Items.Add(item);
-        }
-        return true;
-    }
-    
-    public bool RemoveItem(string itemID, int quantity = 1)
-    {
-        var item = Items.Find(i => i.ID == itemID);
-        if (item == null || item.Quantity < quantity) return false;
-        
-        item.Quantity -= quantity;
-        if (item.Quantity <= 0)
-        {
-            Items.Remove(item);
-        }
-        return true;
-    }
-}
-
-public class InventoryManager : MonoBehaviour
-{
-    [SerializeField] private Inventory playerInventory;
-    
-    private void Start()
-    {
-        LoadInventory();
-    }
-    
-    private void LoadInventory()
-    {
-        playerInventory = DataManager.Load&lt;Inventory&gt;("PlayerInventory");
-        if (playerInventory == null)
-        {
-            playerInventory = new Inventory();
-            // Add some starting items
-            AddStartingItems();
-        }
-        
-        RefreshInventoryUI();
-    }
-    
-    private void AddStartingItems()
-    {
-        var sword = new Item
-        {
-            ID = "iron_sword",
-            Name = "Iron Sword",
-            Quantity = 1,
-            Rarity = Color.gray,
-            IconPosition = new Vector2(0, 0)
-        };
-        sword.Properties.Add("Damage", 25);
-        sword.Properties.Add("Durability", 100);
-        
-        var potion = new Item
-        {
-            ID = "health_potion",
-            Name = "Health Potion",
-            Quantity = 5,
-            Rarity = Color.green,
-            IconPosition = new Vector2(1, 0)
-        };
-        potion.Properties.Add("HealAmount", 50);
-        
-        playerInventory.AddItem(sword);
-        playerInventory.AddItem(potion);
-        SaveInventory();
-    }
-    
-    public void SaveInventory()
-    {
-        DataManager.Save("PlayerInventory", playerInventory);
-    }
-    
-    public void AddItemToInventory(string itemID, int quantity = 1)
-    {
-        // Create item from database/scriptable object
-        var item = CreateItemFromID(itemID);
-        item.Quantity = quantity;
-        
-        if (playerInventory.AddItem(item))
-        {
-            SaveInventory();
-            RefreshInventoryUI();
-        }
-    }
-    
-    private Item CreateItemFromID(string itemID)
-    {
-        // In a real game, this would query an item database
-        return new Item { ID = itemID, Name = itemID.Replace("_", " "), Quantity = 1 };
-    }
-    
-    private void RefreshInventoryUI()
-    {
-        // Update UI elements to show current inventory
-    }
-}</code></pre>
+// Load Unity types
+Vector3 position = DataManager.Load&lt;Vector3&gt;("PlayerPosition");
+Color color = DataManager.Load&lt;Color&gt;("PlayerColor");</code></pre>
                 </div>
 
-                <h3>World State Persistence</h3>
+                <h3>Save Collections</h3>
                 <div class="code-container">
                     <div class="code-header">
                         <span class="language-label">C#</span>
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
-                    <pre><code class="language-csharp">using System.Collections.Generic;
-using SaveLoadSystem;
-using UnityEngine;
+                    <pre><code class="language-csharp">// Save list
+List&lt;string&gt; inventory = new List&lt;string&gt; { "Sword", "Shield", "Potion" };
+DataManager.Save("Inventory", inventory);
 
-[System.Serializable]
-public class WorldObject
-{
-    public string ID;
-    public Vector3 Position;
-    public Quaternion Rotation;
-    public bool IsActive;
-    public Dictionary&lt;string, object&gt; State = new Dictionary&lt;string, object&gt;();
-}
-
-[System.Serializable]
-public class WorldData
-{
-    public List&lt;WorldObject&gt; Objects = new List&lt;WorldObject&gt;();
-    public Dictionary&lt;string, bool&gt; CompletedQuests = new Dictionary&lt;string, bool&gt;();
-    public Dictionary&lt;string, int&gt; CollectedItems = new Dictionary&lt;string, int&gt;();
-    public float TimeOfDay = 12.0f;
-    public int DayNumber = 1;
-}
-
-public class WorldManager : MonoBehaviour
-{
-    [SerializeField] private WorldData worldData;
-    [SerializeField] private List&lt;GameObject&gt; persistentObjects;
-    
-    private void Start()
-    {
-        LoadWorldState();
-        ApplyWorldState();
-    }
-    
-    private void LoadWorldState()
-    {
-        worldData = DataManager.Load&lt;WorldData&gt;("WorldState");
-        if (worldData == null)
-        {
-            worldData = new WorldData();
-            CaptureInitialWorldState();
-        }
-    }
-    
-    private void CaptureInitialWorldState()
-    {
-        // Capture all objects marked as persistent
-        foreach (var obj in persistentObjects)
-        {
-            var persistentObj = obj.GetComponent&lt;PersistentObject&gt;();
-            if (persistentObj != null)
-            {
-                var worldObj = new WorldObject
-                {
-                    ID = persistentObj.UniqueID,
-                    Position = obj.transform.position,
-                    Rotation = obj.transform.rotation,
-                    IsActive = obj.activeInHierarchy
-                };
-                
-                // Capture custom state
-                persistentObj.SaveState(worldObj.State);
-                worldData.Objects.Add(worldObj);
-            }
-        }
-        
-        SaveWorldState();
-    }
-    
-    private void ApplyWorldState()
-    {
-        foreach (var worldObj in worldData.Objects)
-        {
-            var gameObj = FindObjectByID(worldObj.ID);
-            if (gameObj != null)
-            {
-                gameObj.transform.position = worldObj.Position;
-                gameObj.transform.rotation = worldObj.Rotation;
-                gameObj.SetActive(worldObj.IsActive);
-                
-                var persistentObj = gameObj.GetComponent&lt;PersistentObject&gt;();
-                if (persistentObj != null)
-                {
-                    persistentObj.LoadState(worldObj.State);
-                }
-            }
-        }
-    }
-    
-    public void SaveWorldState()
-    {
-        // Update all persistent objects
-        foreach (var worldObj in worldData.Objects)
-        {
-            var gameObj = FindObjectByID(worldObj.ID);
-            if (gameObj != null)
-            {
-                worldObj.Position = gameObj.transform.position;
-                worldObj.Rotation = gameObj.transform.rotation;
-                worldObj.IsActive = gameObj.activeInHierarchy;
-                
-                var persistentObj = gameObj.GetComponent&lt;PersistentObject&gt;();
-                if (persistentObj != null)
-                {
-                    worldObj.State.Clear();
-                    persistentObj.SaveState(worldObj.State);
-                }
-            }
-        }
-        
-        DataManager.Save("WorldState", worldData);
-    }
-    
-    private GameObject FindObjectByID(string id)
-    {
-        return persistentObjects.Find(obj => 
-        {
-            var persistent = obj.GetComponent&lt;PersistentObject&gt;();
-            return persistent != null && persistent.UniqueID == id;
-        });
-    }
-    
-    public void CompleteQuest(string questID)
-    {
-        worldData.CompletedQuests[questID] = true;
-        SaveWorldState();
-    }
-    
-    public bool IsQuestCompleted(string questID)
-    {
-        return worldData.CompletedQuests.ContainsKey(questID) && worldData.CompletedQuests[questID];
-    }
-}</code></pre>
+// Load list
+List&lt;string&gt; loadedInventory = DataManager.Load&lt;List&lt;string&gt;&gt;("Inventory");</code></pre>
                 </div>
-            </section>
 
-            <section id="ui-examples" class="section">
-                <h2>UI Integration Examples</h2>
-
-                <h3>Save Slot Selection UI</h3>
+                <h3>Manage Save Slots</h3>
                 <div class="code-container">
                     <div class="code-header">
                         <span class="language-label">C#</span>
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
-                    <pre><code class="language-csharp">using System;
-using System.Collections.Generic;
-using SaveLoadSystem;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
+                    <pre><code class="language-csharp">// Create and switch to new save slot
+DataManager.CreateSaveSlot("NewGame");
+DataManager.SetActiveSlot("NewGame");
 
-public class SaveSlotSelectionUI : MonoBehaviour
+// Check if slot exists
+if (DataManager.DoesSlotExist("Player1"))
 {
-    [Header("UI References")]
-    [SerializeField] private Transform slotContainer;
-    [SerializeField] private GameObject slotPrefab;
-    [SerializeField] private Button newSlotButton;
-    [SerializeField] private Button deleteModeButton;
-    [SerializeField] private TextMeshProUGUI statusText;
-    
-    [Header("Slot Prefab Components")]
-    [SerializeField] private string slotNameInputPath = "NameInput";
-    [SerializeField] private string loadButtonPath = "LoadButton";
-    [SerializeField] private string deleteButtonPath = "DeleteButton";
-    [SerializeField] private string infoTextPath = "InfoText";
-    
-    private bool deleteMode = false;
-    private List&lt;GameObject&gt; currentSlotUIs = new List&lt;GameObject&gt;();
-    
-    public static event Action&lt;string&gt; OnSlotSelected;
-    
-    private void Start()
-    {
-        RefreshSlotList();
-        
-        newSlotButton.onClick.AddListener(CreateNewSlot);
-        deleteModeButton.onClick.AddListener(ToggleDeleteMode);
-    }
-    
-    private void RefreshSlotList()
-    {
-        // Clear existing UI
-        foreach (var slotUI in currentSlotUIs)
-        {
-            if (slotUI != null) Destroy(slotUI);
-        }
-        currentSlotUIs.Clear();
-        
-        // Create UI for each save slot
-        var saveSlots = DataManager.GetSaveSlots();
-        foreach (var slot in saveSlots)
-        {
-            CreateSlotUI(slot);
-        }
-        
-        UpdateStatusText();
-    }
-    
-    private void CreateSlotUI(SaveSlot slot)
-    {
-        GameObject slotUI = Instantiate(slotPrefab, slotContainer);
-        currentSlotUIs.Add(slotUI);
-        
-        // Get components
-        var nameInput = slotUI.transform.Find(slotNameInputPath).GetComponent&lt;TMP_InputField&gt;();
-        var loadButton = slotUI.transform.Find(loadButtonPath).GetComponent&lt;Button&gt;();
-        var deleteButton = slotUI.transform.Find(deleteButtonPath).GetComponent&lt;Button&gt;();
-        var infoText = slotUI.transform.Find(infoTextPath).GetComponent&lt;TextMeshProUGUI&gt;();
-        
-        // Setup slot info
-        nameInput.text = slot.Name;
-        
-        // Show file size and last modified
-        long fileSize = slot.GetFileSize();
-        DateTime lastModified = slot.GetLastModified();
-        string sizeText = fileSize > 0 ? $"{fileSize / 1024f:F1} KB" : "Empty";
-        string timeText = lastModified != DateTime.MinValue ? lastModified.ToString("MM/dd/yyyy HH:mm") : "Never";
-        infoText.text = $"Size: {sizeText} | Last Modified: {timeText}";
-        
-        // Setup button events
-        loadButton.onClick.AddListener(() => LoadSlot(slot.Name));
-        deleteButton.onClick.AddListener(() => DeleteSlot(slot.Name));
-        nameInput.onEndEdit.AddListener((newName) => RenameSlot(slot.Name, newName));
-        
-        // Show/hide delete button based on mode
-        deleteButton.gameObject.SetActive(deleteMode);
-        
-        // Color coding based on file size
-        if (fileSize == 0)
-        {
-            slotUI.GetComponent&lt;Image&gt;().color = new Color(1, 1, 1, 0.5f); // Empty slot
-        }
-        else if (slot.UseEncryption)
-        {
-            slotUI.GetComponent&lt;Image&gt;().color = new Color(1, 0.8f, 0.8f, 1); // Encrypted
-        }
-        else if (slot.UseCompression)
-        {
-            slotUI.GetComponent&lt;Image&gt;().color = new Color(0.8f, 1, 0.8f, 1); // Compressed
-        }
-    }
-    
-    private void CreateNewSlot()
-    {
-        string baseName = "Save";
-        string newName = baseName;
-        int counter = 1;
-        
-        // Find unique name
-        while (DataManager.DoesSlotExist(newName))
-        {
-            newName = $"{baseName}_{counter}";
-            counter++;
-        }
-        
-        DataManager.CreateSaveSlot(newName);
-        RefreshSlotList();
-        
-        statusText.text = $"Created new save slot: {newName}";
-        statusText.color = Color.green;
-    }
-    
-    private void LoadSlot(string slotName)
-    {
-        try
-        {
-            DataManager.SetActiveSlot(slotName);
-            OnSlotSelected?.Invoke(slotName);
-            
-            statusText.text = $"Loaded save slot: {slotName}";
-            statusText.color = Color.green;
-            
-            // Close the selection UI
-            gameObject.SetActive(false);
-        }
-        catch (Exception ex)
-        {
-            statusText.text = $"Failed to load slot: {ex.Message}";
-            statusText.color = Color.red;
-        }
-    }
-    
-    private void DeleteSlot(string slotName)
-    {
-        // Confirmation dialog would be good here
-        if (DataManager.GetSaveSlots().Count <= 1)
-        {
-            statusText.text = "Cannot delete the last save slot";
-            statusText.color = Color.red;
-            return;
-        }
-        
-        DataManager.DeleteSaveSlot(slotName);
-        RefreshSlotList();
-        
-        statusText.text = $"Deleted save slot: {slotName}";
-        statusText.color = Color.yellow;
-    }
-    
-    private void RenameSlot(string oldName, string newName)
-    {
-        if (string.IsNullOrWhiteSpace(newName) || oldName == newName)
-            return;
-        
-        if (DataManager.DoesSlotExist(newName))
-        {
-            statusText.text = $"Name '{newName}' already exists";
-            statusText.color = Color.red;
-            RefreshSlotList(); // Reset UI
-            return;
-        }
-        
-        DataManager.RenameSaveSlot(oldName, newName);
-        RefreshSlotList();
-        
-        statusText.text = $"Renamed '{oldName}' to '{newName}'";
-        statusText.color = Color.blue;
-    }
-    
-    private void ToggleDeleteMode()
-    {
-        deleteMode = !deleteMode;
-        deleteModeButton.GetComponentInChildren&lt;TextMeshProUGUI&gt;().text = deleteMode ? "Exit Delete Mode" : "Delete Mode";
-        deleteModeButton.GetComponent&lt;Image&gt;().color = deleteMode ? Color.red : Color.white;
-        
-        RefreshSlotList();
-    }
-    
-    private void UpdateStatusText()
-    {
-        int slotCount = DataManager.GetSaveSlots().Count;
-        statusText.text = $"{slotCount} save slot{(slotCount != 1 ? "s" : "")} available";
-        statusText.color = Color.white;
-    }
-}</code></pre>
-                </div>
-
-                <h3>Auto-Save Indicator</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">using System.Collections;
-using SaveLoadSystem;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
-
-public class AutoSaveIndicator : MonoBehaviour
-{
-    [Header("UI References")]
-    [SerializeField] private GameObject saveIndicator;
-    [SerializeField] private TextMeshProUGUI saveText;
-    [SerializeField] private Image saveIcon;
-    [SerializeField] private Slider progressBar;
-    
-    [Header("Settings")]
-    [SerializeField] private float autoSaveInterval = 30f; // seconds
-    [SerializeField] private float indicatorDuration = 2f;
-    [SerializeField] private Color savingColor = Color.yellow;
-    [SerializeField] private Color savedColor = Color.green;
-    [SerializeField] private Color errorColor = Color.red;
-    
-    private float timeSinceLastSave = 0f;
-    private bool isSaving = false;
-    
-    private void Start()
-    {
-        saveIndicator.SetActive(false);
-        StartCoroutine(AutoSaveRoutine());
-    }
-    
-    private void Update()
-    {
-        timeSinceLastSave += Time.deltaTime;
-        
-        // Update progress bar
-        if (progressBar != null)
-        {
-            progressBar.value = timeSinceLastSave / autoSaveInterval;
-        }
-    }
-    
-    private IEnumerator AutoSaveRoutine()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(autoSaveInterval);
-            
-            if (!isSaving)
-            {
-                yield return StartCoroutine(PerformAutoSave());
-            }
-        }
-    }
-    
-    private IEnumerator PerformAutoSave()
-    {
-        isSaving = true;
-        
-        // Show saving indicator
-        ShowSaveIndicator("Auto-saving...", savingColor);
-        
-        try
-        {
-            // Simulate async save operation
-            yield return new WaitForSeconds(0.1f);
-            
-            // Perform actual save operations
-            SaveGameData();
-            
-            // Show success
-            ShowSaveIndicator("Auto-save complete!", savedColor);
-            timeSinceLastSave = 0f;
-        }
-        catch (System.Exception ex)
-        {
-            // Show error
-            ShowSaveIndicator($"Auto-save failed: {ex.Message}", errorColor);
-            CustomLogger.LogError($"Auto-save failed: {ex.Message}");
-        }
-        
-        // Hide indicator after duration
-        yield return new WaitForSeconds(indicatorDuration);
-        HideSaveIndicator();
-        
-        isSaving = false;
-    }
-    
-    public void ManualSave()
-    {
-        if (!isSaving)
-        {
-            StartCoroutine(PerformManualSave());
-        }
-    }
-    
-    private IEnumerator PerformManualSave()
-    {
-        isSaving = true;
-        
-        ShowSaveIndicator("Saving...", savingColor);
-        
-        try
-        {
-            yield return new WaitForSeconds(0.1f);
-            SaveGameData();
-            ShowSaveIndicator("Game saved!", savedColor);
-            timeSinceLastSave = 0f;
-        }
-        catch (System.Exception ex)
-        {
-            ShowSaveIndicator($"Save failed: {ex.Message}", errorColor);
-            CustomLogger.LogError($"Manual save failed: {ex.Message}");
-        }
-        
-        yield return new WaitForSeconds(indicatorDuration);
-        HideSaveIndicator();
-        
-        isSaving = false;
-    }
-    
-    private void SaveGameData()
-    {
-        // Save all critical game data
-        var playerController = FindObjectOfType<PlayerController>();
-        if (playerController != null)
-        {
-            playerController.SavePlayerData();
-        }
-        
-        var worldManager = FindObjectOfType<WorldManager>();
-        if (worldManager != null)
-        {
-            worldManager.SaveWorldState();
-        }
-        
-        var inventoryManager = FindObjectOfType<InventoryManager>();
-        if (inventoryManager != null)
-        {
-            inventoryManager.SaveInventory();
-        }
-        
-        // Save timestamp
-        DataManager.Save("LastSaveTime", System.DateTime.Now.ToBinary());
-    }
-    
-    private void ShowSaveIndicator(string message, Color color)
-    {
-        saveIndicator.SetActive(true);
-        saveText.text = message;
-        saveText.color = color;
-        saveIcon.color = color;
-        
-        // Animate in
-        LeanTween.cancel(saveIndicator);
-        saveIndicator.transform.localScale = Vector3.zero;
-        LeanTween.scale(saveIndicator, Vector3.one, 0.3f).setEaseOutBack();
-    }
-    
-    private void HideSaveIndicator()
-    {
-        LeanTween.scale(saveIndicator, Vector3.zero, 0.2f).setEaseInBack().setOnComplete(() =>
-        {
-            saveIndicator.SetActive(false);
-        });
-    }
-    
-    private void OnApplicationFocus(bool hasFocus)
-    {
-        if (!hasFocus && !isSaving)
-        {
-            // Quick save when losing focus
-            StartCoroutine(PerformAutoSave());
-        }
-    }
-    
-    private void OnApplicationPause(bool pauseStatus)
-    {
-        if (pauseStatus && !isSaving)
-        {
-            // Save when pausing (mobile)
-            StartCoroutine(PerformAutoSave());
-        }
-    }
-}</code></pre>
-                </div>
-            </section>
-
-            <section id="setup-wizard" class="section">
-                <h2>Setup Wizard</h2>
-                <p>The Setup Wizard provides an easy way to configure the save system for your project needs.</p>
-
-                <h3>Basic Setup</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">using SaveLoadSystem;
-using UnityEngine;
-
-public class GameManager : MonoBehaviour
-{
-    [Header("Save System Configuration")]
-    [SerializeField] private SaveSystemConfig config;
-    
-    private void Awake()
-    {
-        // Initialize save system with configuration
-        var setupWizard = gameObject.AddComponent<SetupWizard>();
-        
-        // Or use scriptable object configuration
-        if (config != null)
-        {
-            CustomLogger.CurrentLogLevel = config.logLevel;
-            // Apply other settings...
-        }
-        
-        InitializeSaveSlots();
-    }
-    
-    private void InitializeSaveSlots()
-    {
-        // Create default save slot if none exist
-        if (DataManager.GetSaveSlots().Count == 0)
-        {
-            DataManager.CreateSaveSlot("DefaultSave");
-            DataManager.SetActiveSlot("DefaultSave");
-        }
-        else
-        {
-            // Use the first available slot
-            var firstSlot = DataManager.GetSaveSlots()[0];
-            DataManager.SetActiveSlot(firstSlot.Name);
-        }
-    }
-}</code></pre>
-                </div>
-
-                <h3>Configuration Options</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Setting</th>
-                            <th>Options</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>LogLevel</code></td>
-                            <td>None, Minimal, Detailed</td>
-                            <td>Controls how much logging information is displayed</td>
-                        </tr>
-                        <tr>
-                            <td><code>Compression</code></td>
-                            <td>None, GZIP</td>
-                            <td>Default compression method for new save slots</td>
-                        </tr>
-                        <tr>
-                            <td><code>Encryption</code></td>
-                            <td>None, AES</td>
-                            <td>Default encryption method for new save slots</td>
-                        </tr>
-                        <tr>
-                            <td><code>AutoBackup</code></td>
-                            <td>true, false</td>
-                            <td>Whether to create backup copies of save files</td>
-                        </tr>
-                        <tr>
-                            <td><code>MaxBackupFiles</code></td>
-                            <td>1-10</td>
-                            <td>Maximum number of backup files to keep</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section id="best-practices" class="section">
-                <h2>Best Practices</h2>
-
-                <h3>Performance Optimization</h3>
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <h4>📊 Save Frequency</h4>
-                        <p>Don't save on every frame. Use events like level completion, item pickup, or periodic auto-saves (30-60 seconds).</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>⚡ Batch Operations</h4>
-                        <p>Group multiple save operations together rather than calling Save() multiple times in sequence.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>📦 Data Size</h4>
-                        <p>Use compression for large save files. Avoid storing unnecessary data like cached calculations.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>🔒 Security</h4>
-                        <p>Enable encryption for competitive games or when storing sensitive data like purchases.</p>
-                    </div>
-                </div>
-
-                <h3>Error Handling</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Always provide fallback values
-public void LoadPlayerData()
-{
-    var playerData = DataManager.Load<PlayerData>("PlayerData");
-    
-    if (playerData == null)
-    {
-        // Create default data
-        playerData = new PlayerData
-        {
-            Level = 1,
-            Health = 100,
-            Position = Vector3.zero
-        };
-        
-        // Save the defaults
-        DataManager.Save("PlayerData", playerData);
-    }
-    
-    ApplyPlayerData(playerData);
+    DataManager.SetActiveSlot("Player1");
 }
 
-// Validate data after loading
-public void LoadSettings()
-{
-    var settings = DataManager.Load<GameSettings>("Settings");
-    
-    if (settings != null)
-    {
-        // Validate loaded settings
-        settings.Volume = Mathf.Clamp01(settings.Volume);
-        settings.QualityLevel = Mathf.Clamp(settings.QualityLevel, 0, QualitySettings.names.Length - 1);
-        
-        // Re-save if validation changed anything
-        DataManager.Save("Settings", settings);
-    }
-}</code></pre>
-                </div>
-
-                <h3>Data Organization</h3>
-                <div class="alert alert-info">
-                    <strong>Tip:</strong> Use descriptive keys like "PlayerStats", "WorldState_Level1", "Settings_Audio" rather than generic names like "Data1", "Save", etc.
-                </div>
-
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Good: Descriptive, organized keys
-DataManager.Save("Player_Stats", playerStats);
-DataManager.Save("Player_Inventory", inventory);
-DataManager.Save("Player_Achievements", achievements);
-DataManager.Save("World_CurrentLevel", currentLevelName);
-DataManager.Save("World_CompletedLevels", completedLevels);
-DataManager.Save("Settings_Graphics", graphicsSettings);
-DataManager.Save("Settings_Audio", audioSettings);
-
-// Bad: Generic, unclear keys
-DataManager.Save("Data1", playerStats);
-DataManager.Save("Save", inventory);
-DataManager.Save("Stuff", achievements);</code></pre>
-                </div>
-            </section>
-
-            <section id="troubleshooting" class="section">
-                <h2>Troubleshooting</h2>
-
-                <h3>Common Issues</h3>
-                
-                <h4>Save File Not Found</h4>
-                <div class="alert alert-warning">
-                    <strong>Problem:</strong> Getting null values when loading data that should exist.
-                </div>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">Solution</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Check if save slot exists and is active
-Debug.Log($"Active slot: {DataManager.GetSaveSlots().FirstOrDefault()?.Name}");
-Debug.Log($"Save path: {DataManager.GetSaveSlots().FirstOrDefault()?.SavePath}");
-Debug.Log($"File exists: {File.Exists(DataManager.GetSaveSlots().FirstOrDefault()?.SavePath)}");
-
-// Ensure slot is properly set
-if (!DataManager.DoesSlotExist("MainSave"))
-{
-    DataManager.CreateSaveSlot("MainSave");
-}
-DataManager.SetActiveSlot("MainSave");</code></pre>
-                </div>
-
-                <h4>Serialization Errors</h4>
-                <div class="alert alert-warning">
-                    <strong>Problem:</strong> Custom classes not saving/loading properly.
-                </div>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">Solution</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Ensure classes are marked as [Serializable]
-[System.Serializable]
-public class PlayerData
-{
-    public int Level;
-    public float Health;
-    // All fields should be public or have public properties
-}
-
-// Avoid Unity-specific types without converters
-// Bad:
-public Transform PlayerTransform; // Won't serialize
-
-// Good:
-public Vector3 PlayerPosition;
-public Quaternion PlayerRotation;</code></pre>
-                </div>
-
-                <h4>Encryption Key Lost</h4>
-                <div class="alert alert-danger">
-                    <strong>Problem:</strong> Cannot decrypt save files after key is lost.
-                </div>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">Prevention</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Store encryption key securely
-public class EncryptionKeyManager
-{
-    private static readonly string KEY_PREF = "SaveSystem_EncryptionKey";
-    
-    public static byte[] GetOrCreateKey()
-    {
-        string keyString = PlayerPrefs.GetString(KEY_PREF, "");
-        
-        if (string.IsNullOrEmpty(keyString))
-        {
-            // Generate new key
-            byte[] newKey = EncryptionUtility.GenerateKey();
-            keyString = Convert.ToBase64String(newKey);
-            PlayerPrefs.SetString(KEY_PREF, keyString);
-            PlayerPrefs.Save();
-            return newKey;
-        }
-        
-        return Convert.FromBase64String(keyString);
-    }
-}</code></pre>
-                </div>
-
-                <h3>Debugging Tips</h3>
-                <ul>
-                    <li>Enable detailed logging: <code>CustomLogger.CurrentLogLevel = LogLevel.Detailed;</code></li>
-                    <li>Check the persistent data path: <code>Debug.Log(Application.persistentDataPath);</code></li>
-                    <li>Verify save file contents manually in a text editor</li>
-                    <li>Test with fresh save slots to rule out corruption</li>
-                    <li>Use Unity's profiler to check for performance issues during save operations</li>
-                </ul>
-            </section>
-
-            <section id="migration" class="section">
-                <h2>Migration & Versioning</h2>
-                <p>Handle save file compatibility when updating your game.</p>
-
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">[System.Serializable]
-public class SaveFileVersion
-{
-    public int Version = 1;
-    public string GameVersion = "1.0.0";
-    public System.DateTime CreatedDate = System.DateTime.Now;
-}
-
-public class SaveMigrationManager
-{
-    private const int CURRENT_SAVE_VERSION = 2;
-    
-    public static void MigrateIfNeeded()
-    {
-        var version = DataManager.Load<SaveFileVersion>("SaveVersion");
-        
-        if (version == null)
-        {
-            // Legacy save file without version
-            MigrateFromLegacy();
-            version = new SaveFileVersion { Version = CURRENT_SAVE_VERSION };
-        }
-        else if (version.Version < CURRENT_SAVE_VERSION)
-        {
-            // Migrate from older version
-            MigrateFromVersion(version.Version);
-            version.Version = CURRENT_SAVE_VERSION;
-        }
-        
-        DataManager.Save("SaveVersion", version);
-    }
-    
-    private static void MigrateFromLegacy()
-    {
-        // Example: Convert old player data format
-        var oldPlayerData = DataManager.Load<OldPlayerData>("Player");
-        if (oldPlayerData != null)
-        {
-            var newPlayerData = new PlayerData
-            {
-                Level = oldPlayerData.Level,
-                Health = oldPlayerData.HP, // Field name changed
-                Position = oldPlayerData.Position
-            };
-            
-            DataManager.Save("PlayerData", newPlayerData);
-            // Don't delete old data immediately - keep for rollback
-        }
-    }
-    
-    private static void MigrateFromVersion(int fromVersion)
-    {
-        switch (fromVersion)
-        {
-            case 1:
-                MigrateFrom1To2();
-                break;
-            // Add more cases as versions increase
-        }
-    }
-    
-    private static void MigrateFrom1To2()
-    {
-        // Example migration logic
-        var inventory = DataManager.Load<List<string>>("Inventory");
-        if (inventory != null)
-        {
-            var newInventory = new List<Item>();
-            foreach (var itemName in inventory)
-            {
-                newInventory.Add(new Item { Name = itemName, Quantity = 1 });
-            }
-            DataManager.Save("PlayerInventory", newInventory);
-        }
-    }
-}
-
-// Use in game initialization
-private void Start()
-{
-    SaveMigrationManager.MigrateIfNeeded();
-    LoadGameData();
-}</code></pre>
+// Rename a save slot
+DataManager.RenameSaveSlot("OldName", "NewName");</code></pre>
                 </div>
             </section>
 
@@ -2224,23 +914,37 @@ private void Start()
                             <td>get/set</td>
                             <td>Full file system path to the save file</td>
                         </tr>
+                    </tbody>
+                </table>
+
+                <h3>SetupWizard Configuration</h3>
+                <table class="api-table">
+                    <thead>
                         <tr>
-                            <td><code>UseCompression</code></td>
-                            <td><code>bool</code></td>
-                            <td>get/set</td>
-                            <td>Whether to compress save data with GZIP</td>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Values</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>LogLevel</code></td>
+                            <td><code>LogLevel</code></td>
+                            <td>None, Minimal, Detailed</td>
+                            <td>Controls how much logging information is displayed</td>
                         </tr>
                         <tr>
-                            <td><code>UseEncryption</code></td>
-                            <td><code>bool</code></td>
-                            <td>get/set</td>
-                            <td>Whether to encrypt save data with AES</td>
+                            <td><code>Compression</code></td>
+                            <td><code>Compression</code></td>
+                            <td>None, GZIP</td>
+                            <td>Compression method applied to all save operations</td>
                         </tr>
                         <tr>
-                            <td><code>EncryptionKey</code></td>
-                            <td><code>byte[]</code></td>
-                            <td>get/set</td>
-                            <td>The AES encryption key (auto-generated if null)</td>
+                            <td><code>Encryption</code></td>
+                            <td><code>Encryption</code></td>
+                            <td>None, AES</td>
+                            <td>Encryption method applied to all save operations</td>
                         </tr>
                     </tbody>
                 </table>
