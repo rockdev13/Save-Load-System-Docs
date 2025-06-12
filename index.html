@@ -3,1051 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unity Save System - Complete Documentation</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <title>DataSaving System Documentation</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
-        :root {
-            --primary-color: #2d3748;
-            --secondary-color: #4a5568;
-            --accent-color: #3182ce;
-            --success-color: #38a169;
-            --warning-color: #d69e2e;
-            --danger-color: #e53e3e;
-            --bg-primary: #ffffff;
-            --bg-secondary: #f7fafc;
-            --bg-code: #1a202c;
-            --text-primary: #2d3748;
-            --text-secondary: #4a5568;
-            --text-muted: #718096;
-            --border-color: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: var(--text-primary);
-            background: var(--bg-secondary);
+            color: #2c3e50;
+            background: #f8f9fa;
+            padding: 0;
         }
-
+        
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 2rem;
+            background: white;
             min-height: 100vh;
         }
-
-        /* Header */
-        .header {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 2rem 0;
+            padding: 2rem 2rem 1rem;
             text-align: center;
-            box-shadow: var(--shadow);
         }
-
-        .header h1 {
+        
+        h1 {
             font-size: 2.5rem;
-            margin-bottom: 0.5rem;
             font-weight: 300;
+            margin-bottom: 0.5rem;
         }
-
-        .header p {
+        
+        .subtitle {
             font-size: 1.1rem;
             opacity: 0.9;
         }
-
-        .version-badge {
-            display: inline-block;
-            background: var(--accent-color);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            margin-top: 1rem;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background: var(--bg-primary);
-            padding: 2rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            height: fit-content;
-            position: sticky;
-            top: 2rem;
-        }
-
-        .nav-section {
-            margin-bottom: 2rem;
-        }
-
-        .nav-section h3 {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-
-        .nav-list {
-            list-style: none;
-        }
-
-        .nav-list li {
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-list a {
-            color: var(--text-muted);
-            text-decoration: none;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            display: block;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .nav-list a:hover,
-        .nav-list a.active {
-            background: var(--bg-secondary);
-            color: var(--accent-color);
-            transform: translateX(4px);
-        }
-
-        /* Main Content */
-        .main-content {
-            background: var(--bg-primary);
+        
+        main {
             padding: 2rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
         }
-
-        /* Typography */
-        h1, h2, h3, h4 {
+        
+        section {
+            margin-bottom: 3rem;
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 1.8rem;
             margin-bottom: 1rem;
-            line-height: 1.3;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--accent-color);
+            border-bottom: 2px solid #e9ecef;
             padding-bottom: 0.5rem;
         }
-
-        h2 {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin-top: 3rem;
-            margin-bottom: 1.5rem;
-        }
-
+        
         h3 {
-            font-size: 1.5rem;
-            color: var(--secondary-color);
-            margin-top: 2rem;
+            color: #495057;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.8rem;
         }
-
-        h4 {
-            font-size: 1.2rem;
-            color: var(--secondary-color);
-        }
-
+        
         p {
             margin-bottom: 1rem;
-            color: var(--text-secondary);
+            color: #6c757d;
         }
-
-        /* Code Blocks */
-        .code-container {
-            position: relative;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .code-header {
-            background: var(--bg-code);
-            color: white;
-            padding: 0.75rem 1rem;
-            font-size: 0.8rem;
-            font-weight: 500;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .language-label {
-            color: #81c784;
-        }
-
-        .copy-btn {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: background 0.2s ease;
-        }
-
-        .copy-btn:hover {
-            background: #2c5aa0;
-        }
-
-        pre[class*="language-"] {
-            margin: 0 !important;
-            border-radius: 0 !important;
-        }
-
-        code[class*="language-"] {
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        /* Inline code */
-        :not(pre) > code {
-            background: var(--bg-secondary);
-            color: var(--accent-color);
+        
+        code {
+            background: #f8f9fa;
             padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.9em;
-            font-weight: 500;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e83e8c;
+            font-size: 0.9rem;
         }
-
-        /* API Tables */
-        .api-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5rem 0;
-            background: var(--bg-primary);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
-
-        .api-table th {
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 500;
-        }
-
-        .api-table td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .api-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .api-table tr:nth-child(even) {
-            background: var(--bg-secondary);
-        }
-
-        /* Alert Boxes */
-        .alert {
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-            border-left: 4px solid;
-        }
-
-        .alert-info {
-            background: #ebf8ff;
-            border-color: var(--accent-color);
-            color: #2c5aa0;
-        }
-
-        .alert-warning {
-            background: #fffbeb;
-            border-color: var(--warning-color);
-            color: #b7791f;
-        }
-
-        .alert-success {
-            background: #f0fff4;
-            border-color: var(--success-color);
-            color: #276749;
-        }
-
-        .alert-danger {
-            background: #fed7d7;
-            border-color: var(--danger-color);
-            color: #c53030;
-        }
-
-        /* Feature Grid */
+        
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
-            margin: 2rem 0;
+            margin: 1.5rem 0;
         }
-
+        
         .feature-card {
-            background: var(--bg-secondary);
+            background: #f8f9fa;
             padding: 1.5rem;
             border-radius: 8px;
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 4px solid #667eea;
         }
-
-        .feature-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
+        
         .feature-card h4 {
-            color: var(--accent-color);
-            margin-bottom: 0.75rem;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            .sidebar {
-                position: static;
-                order: 2;
-            }
-
-            .main-content {
-                order: 1;
-                padding: 1.5rem;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .feature-grid {
-                grid-template-columns: 1fr;
-            }
+        
+        .feature-card p {
+            font-size: 0.9rem;
+            margin: 0;
         }
-
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
+        
+        .method-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin: 1rem 0;
         }
-
-        /* Section spacing */
-        .section {
-            margin-bottom: 3rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color);
+        
+        .method-title {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
         }
-
-        .section:last-child {
-            border-bottom: none;
+        
+        ul {
+            margin: 1rem 0;
+            padding-left: 2rem;
         }
-
-        /* Lists */
-        ul, ol {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
+        
         li {
-            margin-bottom: 0.25rem;
-            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+            color: #6c757d;
+        }
+        
+        .setup-step {
+            background: #e8f4fd;
+            border-left: 4px solid #0066cc;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .step-number {
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        .converter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+        
+        .converter-item {
+            background: #e8f4fd;
+            padding: 0.5rem;
+            border-radius: 4px;
+            text-align: center;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            color: #0066cc;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1>Unity Save System</h1>
-            <p>Complete JSON-based save system with encryption, compression, and multi-slot support</p>
-            <span class="version-badge">Version 1.0</span>
+        <header>
+            <h1>DataSaving System</h1>
+            <p class="subtitle">Complete data persistence solution with compression, encryption, and multi-slot support</p>
         </header>
-
-        <nav class="sidebar">
-            <div class="nav-section">
-                <h3>Getting Started</h3>
-                <ul class="nav-list">
-                    <li><a href="#overview" class="active">Overview</a></li>
-                    <li><a href="#quick-start">Quick Start</a></li>
-                    <li><a href="#features">Features</a></li>
-                </ul>
-            </div>
-
-            <div class="nav-section">
-                <h3>Core API</h3>
-                <ul class="nav-list">
-                    <li><a href="#datamanager">DataManager</a></li>
-                    <li><a href="#saveslot">SaveSlot</a></li>
-                    <li><a href="#saveslotmanager">SaveSlotManager</a></li>
-                    <li><a href="#setupwizard">Setup Wizard</a></li>
-                </ul>
-            </div>
-
-            <div class="nav-section">
-                <h3>Advanced</h3>
-                <ul class="nav-list">
-                    <li><a href="#encryption">Encryption</a></li>
-                    <li><a href="#compression">Compression</a></li>
-                    <li><a href="#unity-types">Unity Types</a></li>
-                </ul>
-            </div>
-
-            <div class="nav-section">
-                <h3>Examples</h3>
-                <ul class="nav-list">
-                    <li><a href="#basic-examples">Basic Usage</a></li>
-                    <li><a href="#api-reference">API Reference</a></li>
-                </ul>
-            </div>
-        </nav>
-
-        <main class="main-content">
-            <section id="overview" class="section">
-                <h1>Overview</h1>
-                <p>The Unity Save System is a comprehensive, modern save/load solution for Unity games. Built with JSON serialization at its core, it provides a clean API for saving game data with support for encryption, compression, and multiple save slots.</p>
-
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <h4>🚀 Easy to Use</h4>
-                        <p>Simple API with just <code>Save()</code> and <code>Load&lt;T&gt;()</code> methods. Get started in minutes with minimal setup required.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>🔒 Secure</h4>
-                        <p>Built-in AES encryption support to protect save data from tampering and cheating.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>📦 Compressed</h4>
-                        <p>GZIP compression reduces file sizes significantly, improving load times and storage efficiency.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>🎮 Unity Ready</h4>
-                        <p>Full support for all Unity types including Vector3, Color, Quaternion, AnimationCurve, and more.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>📁 Multi-Slot</h4>
-                        <p>Built-in save slot management allows multiple save files with easy switching between them.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>⚡ Async</h4>
-                        <p>Modern async/await pattern prevents frame drops during save/load operations.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id="quick-start" class="section">
-                <h2>Quick Start</h2>
+        
+        <main>
+            <section id="quick-setup">
+                <h2>Quick Setup</h2>
                 
-                <h3>1. Add Setup Wizard</h3>
-                <p>Add the <code>SetupWizard</code> component to any GameObject in your first scene and configure the settings in the inspector.</p>
+                <div class="setup-step">
+                    <div class="step-number">1.</div>
+                    <strong>Add SetupWizard to your scene</strong>
+                    <p>Attach the <code>SetupWizard</code> component to a GameObject in your scene. It will automatically initialize the system on Awake.</p>
+                </div>
                 
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Create or use existing save slot
-if (!DataManager.DoesSlotExist("MainSave"))
-{
-    DataManager.CreateSaveSlot("MainSave");
-}
-DataManager.SetActiveSlot("MainSave");</code></pre>
+                <div class="setup-step">
+                    <div class="step-number">2.</div>
+                    <strong>Configure settings</strong>
+                    <p>Set compression type (None/GZIP), encryption (None/AES), and enable auto-slot generation for quick start.</p>
                 </div>
+                
+                <div class="setup-step">
+                    <div class="step-number">3.</div>
+                    <strong>Start saving data</strong>
+                    <p>Use the simple one-liner API to save and load your data immediately.</p>
+                </div>
+                
+                <h3>Basic Usage</h3>
+                <pre>// Save data
+DataManager.Save("playerName", "John");
+DataManager.Save("playerLevel", 42);
+DataManager.Save("playerPosition", transform.position);
 
-                <h3>2. Save Data</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Save simple values
-DataManager.Save("PlayerLevel", 42);
-DataManager.Save("PlayerName", "John Doe");
-DataManager.Save("PlayerPosition", transform.position);</code></pre>
-                </div>
-
-                <h3>3. Load Data</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                    </div>
-                    <pre><code class="language-csharp">// Load simple values
-int level = DataManager.Load&lt;int&gt;("PlayerLevel");
-string name = DataManager.Load&lt;string&gt;("PlayerName");
-Vector3 position = DataManager.Load&lt;Vector3&gt;("PlayerPosition");</code></pre>
-                </div>
+// Load data
+string name = DataManager.Load&lt;string&gt;("playerName");
+int level = DataManager.Load&lt;int&gt;("playerLevel");
+Vector3 position = DataManager.Load&lt;Vector3&gt;("playerPosition");</pre>
             </section>
-
-            <section id="features" class="section">
+            
+            <section id="features">
                 <h2>Features</h2>
                 
-                <h3>Supported Data Types</h3>
-                <ul>
-                    <li><strong>Primitives:</strong> int, float, string, bool, etc.</li>
-                    <li><strong>Collections:</strong> List&lt;T&gt;, Dictionary&lt;K,V&gt;, arrays</li>
-                    <li><strong>Unity Types:</strong> Vector2/3/4, Quaternion, Color, Rect, Bounds, etc.</li>
-                    <li><strong>Custom Classes:</strong> Any serializable class or struct</li>
-                    <li><strong>Advanced Unity:</strong> AnimationCurve, Gradient, Matrix4x4</li>
-                </ul>
-
-                <h3>Save Slot Features</h3>
-                <ul>
-                    <li>Multiple save slots with unique names</li>
-                    <li>Runtime save slot creation/deletion</li>
-                    <li>Save slot renaming</li>
-                    <li>Automatic slot switching</li>
-                </ul>
-
-                <h3>Performance Features</h3>
-                <ul>
-                    <li>Async operations to prevent frame drops</li>
-                    <li>GZIP compression for smaller file sizes</li>
-                    <li>Atomic write operations to prevent corruption</li>
-                    <li>Efficient JSON serialization</li>
-                </ul>
-            </section>
-
-            <section id="datamanager" class="section">
-                <h2>DataManager API</h2>
-                <p>The <code>DataManager</code> is the main entry point for the save system. It provides a simple, static API for all save/load operations.</p>
-
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Method</th>
-                            <th>Description</th>
-                            <th>Example</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>Save(string key, object value)</code></td>
-                            <td>Saves data to the active save slot</td>
-                            <td><code>DataManager.Save("Score", 1000);</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>Load&lt;T&gt;(string key)</code></td>
-                            <td>Loads data from the active save slot</td>
-                            <td><code>int score = DataManager.Load&lt;int&gt;("Score");</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>CreateSaveSlot(string name)</code></td>
-                            <td>Creates a new save slot</td>
-                            <td><code>DataManager.CreateSaveSlot("Player1");</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>DeleteSaveSlot(string name)</code></td>
-                            <td>Deletes an existing save slot</td>
-                            <td><code>DataManager.DeleteSaveSlot("Player1");</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>RenameSaveSlot(string oldName, string newName)</code></td>
-                            <td>Renames an existing save slot</td>
-                            <td><code>DataManager.RenameSaveSlot("Old", "New");</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>SetActiveSlot(string name)</code></td>
-                            <td>Changes the active save slot</td>
-                            <td><code>DataManager.SetActiveSlot("Player2");</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>DoesSlotExist(string name)</code></td>
-                            <td>Checks if a save slot exists</td>
-                            <td><code>bool exists = DataManager.DoesSlotExist("Player1");</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>GetSaveSlots()</code></td>
-                            <td>Returns all available save slots</td>
-                            <td><code>List&lt;SaveSlot&gt; slots = DataManager.GetSaveSlots();</code></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section id="saveslot" class="section">
-                <h2>SaveSlot Class</h2>
-                <p>The <code>SaveSlot</code> class represents an individual save file. Each slot can have its own configuration set through the Setup Wizard.</p>
-
-                <h3>Properties</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Property</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>Name</code></td>
-                            <td><code>string</code></td>
-                            <td>The display name of the save slot</td>
-                        </tr>
-                        <tr>
-                            <td><code>SavePath</code></td>
-                            <td><code>string</code></td>
-                            <td>Full file path to the save file</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>Methods</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Method</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>Save(string key, object value)</code></td>
-                            <td>Saves data to this specific slot</td>
-                        </tr>
-                        <tr>
-                            <td><code>Load&lt;T&gt;(string key)</code></td>
-                            <td>Loads data from this specific slot</td>
-                        </tr>
-                        <tr>
-                            <td><code>Rename(string newName)</code></td>
-                            <td>Renames the save slot and updates file path</td>
-                        </tr>
-                        <tr>
-                            <td><code>GetFileSize()</code></td>
-                            <td>Returns the size of the save file in bytes</td>
-                        </tr>
-                        <tr>
-                            <td><code>GetLastModified()</code></td>
-                            <td>Returns when the save file was last modified</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section id="setupwizard" class="section">
-                <h2>Setup Wizard</h2>
-                <p>The <code>SetupWizard</code> component configures global settings for the save system. Add it to a GameObject in your first scene and configure the settings in the inspector.</p>
-
-                <h3>Configuration Options</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Setting</th>
-                            <th>Options</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>LogLevel</code></td>
-                            <td>None, Minimal, Detailed</td>
-                            <td>Controls how much logging information is displayed</td>
-                        </tr>
-                        <tr>
-                            <td><code>Compression</code></td>
-                            <td>None, GZIP</td>
-                            <td>Compression method applied to all save operations</td>
-                        </tr>
-                        <tr>
-                            <td><code>Encryption</code></td>
-                            <td>None, AES</td>
-                            <td>Encryption method applied to all save operations</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>Basic Setup</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>GZIP Compression</h4>
+                        <p>Reduce file sizes with built-in GZIP compression for efficient storage.</p>
                     </div>
-                    <pre><code class="language-csharp">// Simply add the SetupWizard component to a GameObject
-// Configure settings in the inspector
-// The component will automatically initialize the save system</code></pre>
-                </div>
-            </section>
-
-            <section id="encryption" class="section">
-                <h2>Encryption</h2>
-                <p>The <code>EncryptionUtility</code> class provides AES encryption functionality to protect save data from tampering. Encryption is configured globally through the Setup Wizard and applied automatically to all save operations when enabled.</p>
-
-                <div class="alert alert-info">
-                    <strong>Note:</strong> Encryption settings are configured through the Setup Wizard component and applied via dependency injection to all save operations.
-                </div>
-            </section>
-
-            <section id="compression" class="section">
-                <h2>Compression</h2>
-                <p>The <code>GZIP</code> class provides compression functionality to reduce save file sizes. Compression is configured globally through the Setup Wizard and applied automatically to all save operations when enabled.</p>
-
-                <div class="alert alert-info">
-                    <strong>Note:</strong> Compression settings are configured through the Setup Wizard component and applied via dependency injection to all save operations.
-                </div>
-            </section>
-
-            <section id="unity-types" class="section">
-                <h2>Unity Types Support</h2>
-                <p>The save system includes custom JSON converters for all major Unity types, ensuring seamless serialization.</p>
-
-                <h3>Supported Unity Types</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Supported Types</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Vectors</strong></td>
-                            <td>Vector2, Vector3, Vector4, Vector2Int, Vector3Int</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Rotation</strong></td>
-                            <td>Quaternion</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Colors</strong></td>
-                            <td>Color, Color32</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Geometry</strong></td>
-                            <td>Rect, RectInt, Bounds, BoundsInt, Plane</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Physics</strong></td>
-                            <td>Ray, Ray2D</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Advanced</strong></td>
-                            <td>Matrix4x4, AnimationCurve, Gradient</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section id="basic-examples" class="section">
-                <h2>Basic Examples</h2>
-
-                <h3>Save Player Progress</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    
+                    <div class="feature-card">
+                        <h4>AES Encryption</h4>
+                        <p>Secure your save data with industry-standard AES encryption.</p>
                     </div>
-                    <pre><code class="language-csharp">// Save player level
-DataManager.Save("PlayerLevel", currentLevel);
-
-// Load player level
-int level = DataManager.Load&lt;int&gt;("PlayerLevel");</code></pre>
-                </div>
-
-                <h3>Save Custom Objects</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    
+                    <div class="feature-card">
+                        <h4>Multi-Slot Support</h4>
+                        <p>Create, manage, and switch between multiple save slots seamlessly.</p>
                     </div>
-                    <pre><code class="language-csharp">// Save custom class
-PlayerData playerData = new PlayerData { Health = 100, Experience = 1500 };
-DataManager.Save("PlayerData", playerData);
-
-// Load custom class
-PlayerData loadedData = DataManager.Load&lt;PlayerData&gt;("PlayerData");</code></pre>
-                </div>
-
-                <h3>Save Unity Types</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    
+                    <div class="feature-card">
+                        <h4>Local File Storage</h4>
+                        <p>Save data directly to disk with automatic file management.</p>
                     </div>
-                    <pre><code class="language-csharp">// Save Unity types
-DataManager.Save("PlayerPosition", transform.position);
-DataManager.Save("PlayerColor", playerRenderer.material.color);
-
-// Load Unity types
-Vector3 position = DataManager.Load&lt;Vector3&gt;("PlayerPosition");
-Color color = DataManager.Load&lt;Color&gt;("PlayerColor");</code></pre>
-                </div>
-
-                <h3>Save Collections</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    
+                    <div class="feature-card">
+                        <h4>Built-in Caching</h4>
+                        <p>Faster load times through intelligent caching mechanisms.</p>
                     </div>
-                    <pre><code class="language-csharp">// Save list
-List&lt;string&gt; inventory = new List&lt;string&gt; { "Sword", "Shield", "Potion" };
-DataManager.Save("Inventory", inventory);
-
-// Load list
-List&lt;string&gt; loadedInventory = DataManager.Load&lt;List&lt;string&gt;&gt;("Inventory");</code></pre>
-                </div>
-
-                <h3>Manage Save Slots</h3>
-                <div class="code-container">
-                    <div class="code-header">
-                        <span class="language-label">C#</span>
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    
+                    <div class="feature-card">
+                        <h4>Async Support</h4>
+                        <p>Choose between synchronous and asynchronous operations based on your needs.</p>
                     </div>
-                    <pre><code class="language-csharp">// Create and switch to new save slot
-DataManager.CreateSaveSlot("NewGame");
-DataManager.SetActiveSlot("NewGame");
-
-// Check if slot exists
-if (DataManager.DoesSlotExist("Player1"))
-{
-    DataManager.SetActiveSlot("Player1");
-}
-
-// Rename a save slot
-DataManager.RenameSaveSlot("OldName", "NewName");</code></pre>
                 </div>
-            </section>
-
-            <section id="api-reference" class="section">
-                <h2>Complete API Reference</h2>
                 
-                <h3>DataManager Methods</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Method</th>
-                            <th>Returns</th>
-                            <th>Parameters</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>Save(string, object)</code></td>
-                            <td><code>void</code></td>
-                            <td>key, value</td>
-                            <td>Saves a value to the active save slot</td>
-                        </tr>
-                        <tr>
-                            <td><code>Load&lt;T&gt;(string)</code></td>
-                            <td><code>T</code></td>
-                            <td>key</td>
-                            <td>Loads a value from the active save slot</td>
-                        </tr>
-                        <tr>
-                            <td><code>CreateSaveSlot(string)</code></td>
-                            <td><code>void</code></td>
-                            <td>name</td>
-                            <td>Creates a new save slot with the given name</td>
-                        </tr>
-                        <tr>
-                            <td><code>DeleteSaveSlot(string)</code></td>
-                            <td><code>void</code></td>
-                            <td>name</td>
-                            <td>Deletes the save slot and its file</td>
-                        </tr>
-                        <tr>
-                            <td><code>RenameSaveSlot(string, string)</code></td>
-                            <td><code>void</code></td>
-                            <td>oldName, newName</td>
-                            <td>Renames an existing save slot</td>
-                        </tr>
-                        <tr>
-                            <td><code>SetActiveSlot(string)</code></td>
-                            <td><code>void</code></td>
-                            <td>name</td>
-                            <td>Changes which slot is used for Save/Load operations</td>
-                        </tr>
-                        <tr>
-                            <td><code>GetSaveSlots()</code></td>
-                            <td><code>List&lt;SaveSlot&gt;</code></td>
-                            <td>none</td>
-                            <td>Returns all available save slots</td>
-                        </tr>
-                        <tr>
-                            <td><code>DoesSlotExist(string)</code></td>
-                            <td><code>bool</code></td>
-                            <td>name</td>
-                            <td>Checks if a save slot with the given name exists</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>SaveSlot Properties</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Property</th>
-                            <th>Type</th>
-                            <th>Access</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>Name</code></td>
-                            <td><code>string</code></td>
-                            <td>get/set</td>
-                            <td>The display name of the save slot</td>
-                        </tr>
-                        <tr>
-                            <td><code>SavePath</code></td>
-                            <td><code>string</code></td>
-                            <td>get/set</td>
-                            <td>Full file system path to the save file</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>SetupWizard Configuration</h3>
-                <table class="api-table">
-                    <thead>
-                        <tr>
-                            <th>Property</th>
-                            <th>Type</th>
-                            <th>Values</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>LogLevel</code></td>
-                            <td><code>LogLevel</code></td>
-                            <td>None, Minimal, Detailed</td>
-                            <td>Controls how much logging information is displayed</td>
-                        </tr>
-                        <tr>
-                            <td><code>Compression</code></td>
-                            <td><code>Compression</code></td>
-                            <td>None, GZIP</td>
-                            <td>Compression method applied to all save operations</td>
-                        </tr>
-                        <tr>
-                            <td><code>Encryption</code></td>
-                            <td><code>Encryption</code></td>
-                            <td>None, AES</td>
-                            <td>Encryption method applied to all save operations</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h3>Custom Type Converters</h3>
+                <p>Built-in support for Unity types that Newtonsoft.Json doesn't handle natively:</p>
+                
+                <div class="converter-grid">
+                    <div class="converter-item">Vector2</div>
+                    <div class="converter-item">Vector3</div>
+                    <div class="converter-item">Vector4</div>
+                    <div class="converter-item">Vector2Int</div>
+                    <div class="converter-item">Vector3Int</div>
+                    <div class="converter-item">Quaternion</div>
+                    <div class="converter-item">Color</div>
+                    <div class="converter-item">Color32</div>
+                    <div class="converter-item">Rect</div>
+                    <div class="converter-item">RectInt</div>
+                    <div class="converter-item">Bounds</div>
+                    <div class="converter-item">BoundsInt</div>
+                    <div class="converter-item">Matrix4x4</div>
+                    <div class="converter-item">Ray</div>
+                    <div class="converter-item">Ray2D</div>
+                    <div class="converter-item">Plane</div>
+                    <div class="converter-item">AnimationCurve</div>
+                    <div class="converter-item">Gradient</div>
+                </div>
             </section>
-
-            <footer style="margin-top: 4rem; padding: 2rem; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-muted);">
-                <p>&copy; 2024 Unity Save System. All rights reserved.</p>
-                <p>Built with ❤️ for Unity developers</p>
-            </footer>
+            
+            <section id="api">
+                <h2>API Reference</h2>
+                
+                <h3>Core Operations</h3>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.Save(string key, object value)</div>
+                    <p>Saves a value synchronously with the specified key.</p>
+                    <pre>DataManager.Save("score", 1500);
+DataManager.Save("settings", gameSettings);</pre>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.SaveAsync(string key, object value)</div>
+                    <p>Saves a value asynchronously with the specified key.</p>
+                    <pre>await DataManager.SaveAsync("largeData", bigObject);
+DataManager.SaveAsync("config", config); // Fire and forget</pre>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.Load&lt;T&gt;(string key)</div>
+                    <p>Loads a value synchronously. Returns default(T) if key not found.</p>
+                    <pre>int score = DataManager.Load&lt;int&gt;("score");
+MyClass data = DataManager.Load&lt;MyClass&gt;("userData");</pre>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.LoadAsync&lt;T&gt;(string key)</div>
+                    <p>Loads a value asynchronously. Returns default(T) if key not found.</p>
+                    <pre>int score = await DataManager.LoadAsync&lt;int&gt;("score");
+var data = await DataManager.LoadAsync&lt;MyClass&gt;("userData");</pre>
+                </div>
+                
+                <h3>Save Slot Management</h3>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.CreateSaveSlot(string name)</div>
+                    <p>Creates a new save slot with the specified name.</p>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.SetActiveSlot(string name)</div>
+                    <p>Sets the active save slot. All save/load operations will use this slot.</p>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.DeleteSaveSlot(string name)</div>
+                    <p>Deletes the specified save slot and its data.</p>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.RenameSaveSlot(string oldName, string newName)</div>
+                    <p>Renames an existing save slot.</p>
+                </div>
+                
+                <h3>Utility Methods</h3>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.GetSaveSlots()</div>
+                    <p>Returns a list of all available save slots.</p>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.DoesSlotExist(string name)</div>
+                    <p>Checks if a save slot with the given name exists.</p>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.DeleteAllSaveSlots()</div>
+                    <p>Deletes all save slots and their data. Use with caution.</p>
+                </div>
+                
+                <h3>Configuration</h3>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.CompressionType</div>
+                    <p>Set to <code>Compression.None</code> or <code>Compression.GZIP</code></p>
+                </div>
+                
+                <div class="method-section">
+                    <div class="method-title">DataManager.EncryptionType</div>
+                    <p>Set to <code>Encryption.None</code> or <code>Encryption.AES</code></p>
+                </div>
+            </section>
         </main>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    
-    <script>
-        // Copy code functionality
-        function copyCode(button) {
-            const codeBlock = button.parentElement.nextElementSibling.querySelector('code');
-            const text = codeBlock.textContent;
-            
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                button.style.background = '#38a169';
-                
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.style.background = '#3182ce';
-                }, 2000);
-            });
-        }
-
-        // Smooth scrolling for navigation
-        document.querySelectorAll('.nav-list a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                // Remove active class from all links
-                document.querySelectorAll('.nav-list a').forEach(l => l.classList.remove('active'));
-                
-                // Add active class to clicked link
-                link.classList.add('active');
-                
-                // Scroll to target
-                const targetId = link.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-
-        // Update active navigation based on scroll position
-        window.addEventListener('scroll', () => {
-            const sections = document.querySelectorAll('.section, section');
-            const navLinks = document.querySelectorAll('.nav-list a');
-            
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                if (window.pageYOffset >= sectionTop - 100) {
-                    current = section.getAttribute('id');
-                }
-            });
-            
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === '#' + current) {
-                    link.classList.add('active');
-                }
-            });
-        });
-
-        // Search functionality (basic)
-        function createSearchBox() {
-            const sidebar = document.querySelector('.sidebar');
-            const searchHTML = `
-                <div style="margin-bottom: 1.5rem;">
-                    <input type="text" placeholder="Search documentation..." 
-                           style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); 
-                                  border-radius: 6px; font-size: 0.9rem;" 
-                           id="docSearch">
-                </div>
-            `;
-            sidebar.insertAdjacentHTML('afterbegin', searchHTML);
-            
-            const searchInput = document.getElementById('docSearch');
-            searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                const sections = document.querySelectorAll('.section, section');
-                
-                sections.forEach(section => {
-                    const text = section.textContent.toLowerCase();
-                    const shouldShow = text.includes(query) || query === '';
-                    section.style.display = shouldShow ? 'block' : 'none';
-                });
-            });
-        }
-
-        // Initialize search on load
-        document.addEventListener('DOMContentLoaded', createSearchBox);
-    </script>
 </body>
 </html>
