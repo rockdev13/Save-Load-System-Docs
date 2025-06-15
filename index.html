@@ -3,360 +3,492 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DataSaving System Documentation</title>
+    <title>DataSaving System</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-            color: #2c3e50;
-            background: #f8f9fa;
-            padding: 0;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 2rem 1rem;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
             text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
         }
-        
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin-bottom: 0.5rem;
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        
-        .subtitle {
-            font-size: 1.1rem;
+
+        .header p {
+            font-size: 1.2rem;
             opacity: 0.9;
         }
-        
-        main {
-            padding: 2rem;
+
+        .content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
         }
-        
-        section {
-            margin-bottom: 3rem;
+
+        .section {
+            margin-bottom: 40px;
         }
-        
-        h2 {
+
+        .section h2 {
             color: #667eea;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 0.5rem;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
         }
-        
-        h3 {
-            color: #495057;
+
+        .section h3 {
+            color: #555;
             font-size: 1.3rem;
-            margin: 1.5rem 0 0.8rem;
+            margin: 25px 0 15px 0;
         }
-        
-        p {
-            margin-bottom: 1rem;
-            color: #6c757d;
+
+        .quick-setup {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
         }
-        
+
+        .setup-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .setup-step {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #eee;
+            transition: transform 0.2s;
+        }
+
+        .setup-step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .setup-step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
         code {
-            background: #f8f9fa;
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            color: #e83e8c;
-            font-size: 0.9rem;
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
         }
-        
-        pre {
+
+        .code-block {
             background: #2d3748;
             color: #e2e8f0;
-            padding: 1.5rem;
-            border-radius: 6px;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
             overflow-x: auto;
-            margin: 1rem 0;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
             line-height: 1.4;
+            white-space: pre-wrap; /* This preserves whitespace and line breaks */
         }
-        
-        .feature-grid {
+
+        .code-block .comment {
+            color: #68d391;
+        }
+
+        .code-block .keyword {
+            color: #9f7aea;
+        }
+
+        .code-block .string {
+            color: #fbb6ce;
+        }
+
+        .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 1.5rem 0;
+            gap: 20px;
+            margin: 30px 0;
         }
-        
-        .feature-card {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .feature-card h4 {
-            color: #495057;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-        
-        .feature-card p {
-            font-size: 0.9rem;
-            margin: 0;
-        }
-        
-        .method-section {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 6px;
-            margin: 1rem 0;
-        }
-        
-        .method-title {
-            font-family: 'Consolas', 'Monaco', monospace;
-            color: #667eea;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        ul {
-            margin: 1rem 0;
-            padding-left: 2rem;
-        }
-        
-        li {
-            margin-bottom: 0.3rem;
-            color: #6c757d;
-        }
-        
-        .setup-step {
-            background: #e8f4fd;
-            border-left: 4px solid #0066cc;
-            padding: 1rem 1.5rem;
-            margin: 1rem 0;
-        }
-        
-        .step-number {
-            font-weight: bold;
-            color: #0066cc;
-        }
-        
-        .converter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 0.8rem;
-            margin: 1rem 0;
-        }
-        
-        .converter-item {
-            background: #e8f4fd;
-            padding: 0.5rem;
-            border-radius: 4px;
+
+        .feature {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
             text-align: center;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.85rem;
-            color: #0066cc;
+            transition: transform 0.2s;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature h4 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .api-method {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .api-method h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .method-signature {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap; /* Preserve formatting */
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .warning strong {
+            color: #856404;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
+        <div class="header">
             <h1>DataSaving System</h1>
-            <p class="subtitle">Complete data persistence solution with compression, encryption, and multi-slot support</p>
-        </header>
-        
-        <main>
-            <section id="quick-setup">
-                <h2>Quick Setup</h2>
-                
-                <div class="setup-step">
-                    <div class="step-number">1.</div>
-                    <strong>Add SetupWizard to your scene</strong>
-                    <p>Attach the <code>SetupWizard</code> component to a GameObject in your scene. It will automatically initialize the system on Awake.</p>
-                </div>
-                
-                <div class="setup-step">
-                    <div class="step-number">2.</div>
-                    <strong>Configure settings</strong>
-                    <p>Set compression type (None/GZIP), encryption (None/AES), and enable auto-slot generation for quick start.</p>
-                </div>
-                
-                <div class="setup-step">
-                    <div class="step-number">3.</div>
-                    <strong>Start saving data</strong>
-                    <p>Use the simple one-liner API to save and load your data immediately.</p>
-                </div>
-                
-                <h3>Basic Usage</h3>
-                <pre>// Save data
-DataManager.Save("playerName", "John");
-DataManager.Save("playerLevel", 42);
-DataManager.Save("playerPosition", transform.position);
+            <p>A powerful, thread-safe save system for Unity with encryption, compression, and multi-slot support</p>
+        </div>
 
-// Load data
-string name = DataManager.Load&lt;string&gt;("playerName");
-int level = DataManager.Load&lt;int&gt;("playerLevel");
-Vector3 position = DataManager.Load&lt;Vector3&gt;("playerPosition");</pre>
-            </section>
-            
-            <section id="features">
+        <div class="content">
+            <div class="section">
+                <h2>Quick Setup</h2>
+                <div class="quick-setup">
+                    <p><strong>Get started in 30 seconds:</strong></p>
+                    <div class="setup-steps">
+                        <div class="setup-step">
+                            <h4>1. Add SetupWizard</h4>
+                            <p>Attach the <code>SetupWizard</code> component to any GameObject in your scene.</p>
+                        </div>
+                        <div class="setup-step">
+                            <h4>2. Configure Settings</h4>
+                            <p>Set compression (None/GZIP), encryption (None/AES), and enable auto-slot generation if desired.</p>
+                        </div>
+                        <div class="setup-step">
+                            <h4>3. Start Saving</h4>
+                            <p>Use the simple API to save and load data immediately!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-block"><span class="keyword">using</span> SaveLoadSystem;
+
+<span class="comment">// That's it! Start using the API:</span>
+<span class="keyword">DataManager</span>.Save(<span class="string">"playerName"</span>, <span class="string">"John"</span>);
+<span class="keyword">DataManager</span>.Save(<span class="string">"level"</span>, 42);
+<span class="keyword">DataManager</span>.Save(<span class="string">"position"</span>, transform.position);
+
+<span class="comment">// Load it back:</span>
+<span class="keyword">string</span> name = <span class="keyword">DataManager</span>.Load&lt;<span class="keyword">string</span>&gt;(<span class="string">"playerName"</span>);
+<span class="keyword">int</span> level = <span class="keyword">DataManager</span>.Load&lt;<span class="keyword">int</span>&gt;(<span class="string">"level"</span>);
+<span class="keyword">Vector3</span> position = <span class="keyword">DataManager</span>.Load&lt;<span class="keyword">Vector3</span>&gt;(<span class="string">"position"</span>);</div>
+            </div>
+
+            <div class="section">
                 <h2>Features</h2>
-                
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <h4>GZIP Compression</h4>
-                        <p>Reduce file sizes with built-in GZIP compression for efficient storage.</p>
+                <div class="features">
+                    <div class="feature">
+                        <h4>🗜️ GZIP Compression</h4>
+                        <p>Reduce file sizes with built-in compression</p>
                     </div>
-                    
-                    <div class="feature-card">
-                        <h4>AES Encryption</h4>
-                        <p>Secure your save data with industry-standard AES encryption.</p>
+                    <div class="feature">
+                        <h4>🔒 AES Encryption</h4>
+                        <p>Secure your data with industry-standard encryption</p>
                     </div>
-                    
-                    <div class="feature-card">
-                        <h4>Multi-Slot Support</h4>
-                        <p>Create, manage, and switch between multiple save slots seamlessly.</p>
+                    <div class="feature">
+                        <h4>💾 Multi-Slot Support</h4>
+                        <p>Create and manage multiple save slots</p>
                     </div>
-                    
-                    <div class="feature-card">
-                        <h4>Local File Storage</h4>
-                        <p>Save data directly to disk with automatic file management.</p>
+                    <div class="feature">
+                        <h4>⚡ Smart Caching</h4>
+                        <p>Fast load times with intelligent memory caching</p>
                     </div>
-                    
-                    <div class="feature-card">
-                        <h4>Built-in Caching</h4>
-                        <p>Faster load times through intelligent caching mechanisms.</p>
+                    <div class="feature">
+                        <h4>🔄 Async Support</h4>
+                        <p>Choose sync or async operations</p>
                     </div>
-                    
-                    <div class="feature-card">
-                        <h4>Async Support</h4>
-                        <p>Choose between synchronous and asynchronous operations based on your needs.</p>
+                    <div class="feature">
+                        <h4>🎮 Unity Types</h4>
+                        <p>Built-in support for Vector3, Color, etc.</p>
                     </div>
                 </div>
-                
-                <h3>Custom Type Converters</h3>
-                <p>Built-in support for Unity types that Newtonsoft.Json doesn't handle natively:</p>
-                
-                <div class="converter-grid">
-                    <div class="converter-item">Vector2</div>
-                    <div class="converter-item">Vector3</div>
-                    <div class="converter-item">Vector4</div>
-                    <div class="converter-item">Vector2Int</div>
-                    <div class="converter-item">Vector3Int</div>
-                    <div class="converter-item">Quaternion</div>
-                    <div class="converter-item">Color</div>
-                    <div class="converter-item">Color32</div>
-                    <div class="converter-item">Rect</div>
-                    <div class="converter-item">RectInt</div>
-                    <div class="converter-item">Bounds</div>
-                    <div class="converter-item">BoundsInt</div>
-                    <div class="converter-item">Matrix4x4</div>
-                    <div class="converter-item">Ray</div>
-                    <div class="converter-item">Ray2D</div>
-                    <div class="converter-item">Plane</div>
-                    <div class="converter-item">AnimationCurve</div>
-                    <div class="converter-item">Gradient</div>
-                </div>
-            </section>
-            
-            <section id="api">
+            </div>
+
+            <div class="section">
                 <h2>API Reference</h2>
-                
-                <h3>Core Operations</h3>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.Save(string key, object value)</div>
-                    <p>Saves a value synchronously with the specified key.</p>
-                    <pre>DataManager.Save("score", 1500);
-DataManager.Save("settings", gameSettings);</pre>
+
+                <h3>Core Save/Load Operations</h3>
+
+                <div class="api-method">
+                    <h4>DataManager.Save(string key, object value)</h4>
+                    <div class="method-signature">void Save(string key, object value)</div>
+                    <p>Saves a value synchronously with the specified key. Thread-safe.</p>
+                    <div class="code-block"><span class="keyword">DataManager</span>.Save(<span class="string">"score"</span>, 1500);
+<span class="keyword">DataManager</span>.Save(<span class="string">"settings"</span>, gameSettings);
+<span class="keyword">DataManager</span>.Save(<span class="string">"inventory"</span>, playerItems);</div>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.SaveAsync(string key, object value)</div>
-                    <p>Saves a value asynchronously with the specified key.</p>
-                    <pre>await DataManager.SaveAsync("largeData", bigObject);
-DataManager.SaveAsync("config", config); // Fire and forget</pre>
+
+                <div class="api-method">
+                    <h4>DataManager.SaveAsync(string key, object value)</h4>
+                    <div class="method-signature">async Task SaveAsync(string key, object value)</div>
+                    <p>Saves a value asynchronously. Use for large objects or when you don't want to block the main thread.</p>
+                    <div class="code-block"><span class="keyword">await</span> <span class="keyword">DataManager</span>.SaveAsync(<span class="string">"largeData"</span>, bigObject);
+
+<span class="comment">// Fire and forget (not recommended for critical data)</span>
+<span class="keyword">DataManager</span>.SaveAsync(<span class="string">"config"</span>, config);</div>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.Load&lt;T&gt;(string key)</div>
-                    <p>Loads a value synchronously. Returns default(T) if key not found.</p>
-                    <pre>int score = DataManager.Load&lt;int&gt;("score");
-MyClass data = DataManager.Load&lt;MyClass&gt;("userData");</pre>
+
+                <div class="api-method">
+                    <h4>DataManager.Load&lt;T&gt;(string key)</h4>
+                    <div class="method-signature">T Load&lt;T&gt;(string key)</div>
+                    <p>Loads a value synchronously. Returns <code>default(T)</code> if key not found.</p>
+                    <div class="code-block"><span class="keyword">int</span> score = <span class="keyword">DataManager</span>.Load&lt;<span class="keyword">int</span>&gt;(<span class="string">"score"</span>);
+<span class="keyword">MyClass</span> data = <span class="keyword">DataManager</span>.Load&lt;<span class="keyword">MyClass</span>&gt;(<span class="string">"userData"</span>);
+
+<span class="comment">// Returns 0 if "score" doesn't exist</span>
+<span class="keyword">int</span> defaultScore = <span class="keyword">DataManager</span>.Load&lt;<span class="keyword">int</span>&gt;(<span class="string">"nonexistent"</span>);</div>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.LoadAsync&lt;T&gt;(string key)</div>
-                    <p>Loads a value asynchronously. Returns default(T) if key not found.</p>
-                    <pre>int score = await DataManager.LoadAsync&lt;int&gt;("score");
-var data = await DataManager.LoadAsync&lt;MyClass&gt;("userData");</pre>
+
+                <div class="api-method">
+                    <h4>DataManager.LoadAsync&lt;T&gt;(string key)</h4>
+                    <div class="method-signature">async Task&lt;T&gt; LoadAsync&lt;T&gt;(string key)</div>
+                    <p>Loads a value asynchronously. Returns <code>default(T)</code> if key not found.</p>
+                    <div class="code-block"><span class="keyword">int</span> score = <span class="keyword">await</span> <span class="keyword">DataManager</span>.LoadAsync&lt;<span class="keyword">int</span>&gt;(<span class="string">"score"</span>);
+<span class="keyword">var</span> data = <span class="keyword">await</span> <span class="keyword">DataManager</span>.LoadAsync&lt;<span class="keyword">MyClass</span>&gt;(<span class="string">"userData"</span>);</div>
                 </div>
-                
+
+                <div class="api-method">
+                    <h4>DataManager.DeleteValue(string key)</h4>
+                    <div class="method-signature">void DeleteValue(string key)</div>
+                    <p>Deletes a saved value and removes it from the save file immediately.</p>
+                    <div class="code-block"><span class="comment">// Remove old data</span>
+<span class="keyword">DataManager</span>.DeleteValue(<span class="string">"oldSetting"</span>);
+<span class="keyword">DataManager</span>.DeleteValue(<span class="string">"temporaryData"</span>);</div>
+                </div>
+
+                <div class="api-method">
+                    <h4>DataManager.DeleteValueAsync(string key)</h4>
+                    <div class="method-signature">async Task DeleteValueAsync(string key)</div>
+                    <p>Deletes a saved value asynchronously.</p>
+                    <div class="code-block"><span class="keyword">await</span> <span class="keyword">DataManager</span>.DeleteValueAsync(<span class="string">"largeData"</span>);</div>
+                </div>
+
                 <h3>Save Slot Management</h3>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.CreateSaveSlot(string name)</div>
+
+                <div class="api-method">
+                    <h4>DataManager.CreateSaveSlot(string name)</h4>
+                    <div class="method-signature">void CreateSaveSlot(string name)</div>
                     <p>Creates a new save slot with the specified name.</p>
+                    <div class="code-block"><span class="keyword">DataManager</span>.CreateSaveSlot(<span class="string">"Player1"</span>);
+<span class="keyword">DataManager</span>.CreateSaveSlot(<span class="string">"NewGame+"</span>);</div>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.SetActiveSlot(string name)</div>
-                    <p>Sets the active save slot. All save/load operations will use this slot.</p>
+
+                <div class="api-method">
+                    <h4>DataManager.SetActiveSlot(string name)</h4>
+                    <div class="method-signature">void SetActiveSlot(string name)</div>
+                    <p>Sets the active save slot. All save/load operations will use this slot until changed.</p>
+                    <div class="code-block"><span class="keyword">DataManager</span>.SetActiveSlot(<span class="string">"Player1"</span>);
+
+<span class="comment">// Now all saves/loads use the "Player1" slot</span>
+<span class="keyword">DataManager</span>.Save(<span class="string">"level"</span>, 5);</div>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.DeleteSaveSlot(string name)</div>
-                    <p>Deletes the specified save slot and its data.</p>
+
+                <div class="api-method">
+                    <h4>DataManager.DeleteSaveSlot(string name)</h4>
+                    <div class="method-signature">void DeleteSaveSlot(string name)</div>
+                    <p>Deletes the specified save slot and all its data permanently.</p>
+                    <div class="code-block"><span class="keyword">DataManager</span>.DeleteSaveSlot(<span class="string">"OldSave"</span>);</div>
+                    <div class="warning">
+                        <strong>Warning:</strong> This permanently deletes all data in the slot. Cannot be undone.
+                    </div>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.RenameSaveSlot(string oldName, string newName)</div>
+
+                <div class="api-method">
+                    <h4>DataManager.RenameSaveSlot(string oldName, string newName)</h4>
+                    <div class="method-signature">void RenameSaveSlot(string oldName, string newName)</div>
                     <p>Renames an existing save slot.</p>
+                    <div class="code-block"><span class="keyword">DataManager</span>.RenameSaveSlot(<span class="string">"TempSave"</span>, <span class="string">"MainSave"</span>);</div>
                 </div>
-                
+
                 <h3>Utility Methods</h3>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.GetSaveSlots()</div>
+
+                <div class="api-method">
+                    <h4>DataManager.GetSaveSlots()</h4>
+                    <div class="method-signature">List&lt;SaveSlot&gt; GetSaveSlots()</div>
                     <p>Returns a list of all available save slots.</p>
+                    <div class="code-block"><span class="keyword">var</span> slots = <span class="keyword">DataManager</span>.GetSaveSlots();
+<span class="keyword">foreach</span>(<span class="keyword">var</span> slot <span class="keyword">in</span> slots)
+{
+    Debug.Log($<span class="string">"Slot: {slot.Name}, Size: {slot.GetFileSize()} bytes"</span>);
+}</div>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.DoesSlotExist(string name)</div>
+
+                <div class="api-method">
+                    <h4>DataManager.DoesSlotExist(string name)</h4>
+                    <div class="method-signature">bool DoesSlotExist(string name)</div>
                     <p>Checks if a save slot with the given name exists.</p>
+                    <div class="code-block"><span class="keyword">if</span>(<span class="keyword">DataManager</span>.DoesSlotExist(<span class="string">"Player1"</span>))
+{
+    <span class="keyword">DataManager</span>.SetActiveSlot(<span class="string">"Player1"</span>);
+}
+<span class="keyword">else</span>
+{
+    <span class="keyword">DataManager</span>.CreateSaveSlot(<span class="string">"Player1"</span>);
+}</div>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.DeleteAllSaveSlots()</div>
-                    <p>Deletes all save slots and their data. Use with caution.</p>
+
+                <div class="api-method">
+                    <h4>DataManager.DeleteAllSaveSlots()</h4>
+                    <div class="method-signature">void DeleteAllSaveSlots()</div>
+                    <p>Deletes all save slots and their data. Use with extreme caution.</p>
+                    <div class="code-block"><span class="comment">// Nuclear option - deletes everything</span>
+<span class="keyword">DataManager</span>.DeleteAllSaveSlots();</div>
+                    <div class="warning">
+                        <strong>⚠️ DANGER:</strong> This deletes ALL save data permanently. Typically only used for "Reset All Data" features.
+                    </div>
                 </div>
+            </div>
+
+            <div class="section">
+                <h2>Supported Unity Types</h2>
+                <p>The system includes built-in converters for Unity types that Newtonsoft.Json doesn't handle natively:</p>
                 
-                <h3>Configuration</h3>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.CompressionType</div>
-                    <p>Set to <code>Compression.None</code> or <code>Compression.GZIP</code></p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Example Usage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Vector2, Vector3, Vector4</td><td><code>DataManager.Save("pos", transform.position)</code></td></tr>
+                            <tr><td>Vector2Int, Vector3Int</td><td><code>DataManager.Save("gridPos", gridPosition)</code></td></tr>
+                            <tr><td>Quaternion</td><td><code>DataManager.Save("rotation", transform.rotation)</code></td></tr>
+                            <tr><td>Color, Color32</td><td><code>DataManager.Save("playerColor", Color.red)</code></td></tr>
+                            <tr><td>Rect, RectInt</td><td><code>DataManager.Save("bounds", screenRect)</code></td></tr>
+                            <tr><td>Bounds, BoundsInt</td><td><code>DataManager.Save("area", colliderBounds)</code></td></tr>
+                            <tr><td>Matrix4x4</td><td><code>DataManager.Save("transform", transformMatrix)</code></td></tr>
+                            <tr><td>Ray, Ray2D</td><td><code>DataManager.Save("raycast", cameraRay)</code></td></tr>
+                            <tr><td>Plane</td><td><code>DataManager.Save("ground", groundPlane)</code></td></tr>
+                            <tr><td>AnimationCurve</td><td><code>DataManager.Save("curve", animCurve)</code></td></tr>
+                            <tr><td>Gradient</td><td><code>DataManager.Save("gradient", colorGradient)</code></td></tr>
+                        </tbody>
+                    </table>
                 </div>
-                
-                <div class="method-section">
-                    <div class="method-title">DataManager.EncryptionType</div>
-                    <p>Set to <code>Encryption.None</code> or <code>Encryption.AES</code></p>
+            </div>
+
+            <div class="section">
+                <h2>Configuration</h2>
+                <p>Configure the system through the SetupWizard component or at runtime:</p>
+
+                <h3>Compression Options</h3>
+                <div class="code-block"><span class="keyword">DataManager</span>.CompressionType = Compression.None;  <span class="comment">// No compression</span>
+<span class="keyword">DataManager</span>.CompressionType = Compression.GZIP; <span class="comment">// GZIP compression</span></div>
+
+                <h3>Encryption Options</h3>
+                <div class="code-block"><span class="keyword">DataManager</span>.EncryptionType = Encryption.None; <span class="comment">// No encryption</span>
+<span class="keyword">DataManager</span>.EncryptionType = Encryption.AES;  <span class="comment">// AES encryption</span></div>
+
+                <div class="warning">
+                    <strong>Note:</strong> Configuration changes affect saving immediately but existing save files are loaded using their original settings.
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
     </div>
 </body>
 </html>
