@@ -16,12 +16,76 @@
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+        
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background-color: #111111;
+            border-right: 2px solid #333333;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        
+        .sidebar-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #ffffff;
+            border-bottom: 1px solid #333333;
+            padding-bottom: 10px;
+        }
+        
+        .menu-item {
+            display: block;
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            color: #cccccc;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+        }
+        
+        .menu-item:hover {
+            background-color: #222222;
+            color: #ffffff;
+            border-color: #444444;
+        }
+        
+        .menu-item.active {
+            background-color: #007acc;
+            color: #ffffff;
+            border-color: #0088dd;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px;
+            border-left: 1px solid #222222;
         }
         
         .container {
             max-width: 800px;
-            margin: 0 auto;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+            padding: 30px;
+            background-color: #0a0a0a;
+            border: 2px solid #222222;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         h1 {
@@ -41,9 +105,9 @@
         h2 {
             font-size: 1.8rem;
             font-weight: 400;
-            margin: 40px 0 20px 0;
+            margin-bottom: 20px;
             color: #ffffff;
-            border-bottom: 1px solid #333333;
+            border-bottom: 2px solid #007acc;
             padding-bottom: 8px;
         }
         
@@ -66,6 +130,7 @@
             border-radius: 3px;
             font-family: 'Courier New', monospace;
             font-size: 0.9rem;
+            border: 1px solid #333333;
         }
         
         pre {
@@ -75,20 +140,22 @@
             border-radius: 8px;
             overflow-x: auto;
             margin: 20px 0;
-            border: 1px solid #333333;
+            border: 2px solid #333333;
         }
         
         pre code {
             background: none;
             padding: 0;
+            border: none;
         }
         
         .method {
-            margin-bottom: 25px;
-            padding: 15px;
-            background-color: #0a0a0a;
-            border-radius: 6px;
-            border-left: 3px solid #007acc;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #111111;
+            border-radius: 8px;
+            border: 2px solid #333333;
+            border-left: 4px solid #007acc;
         }
         
         .method-signature {
@@ -96,6 +163,10 @@
             font-size: 0.95rem;
             color: #ffffff;
             margin-bottom: 8px;
+            background-color: #1a1a1a;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #444444;
         }
         
         .method-description {
@@ -105,19 +176,20 @@
         
         .warning {
             background-color: #1a1a00;
-            border-left: 4px solid #ffcc00;
-            padding: 15px;
+            border: 2px solid #ffcc00;
+            padding: 20px;
             margin: 20px 0;
-            border-radius: 4px;
+            border-radius: 8px;
         }
         
         .warning-title {
             color: #ffcc00;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
         }
         
-        ol {
+        ol, ul {
             margin-left: 20px;
             margin-bottom: 20px;
         }
@@ -126,141 +198,272 @@
             margin-bottom: 8px;
             color: #e0e0e0;
         }
+        
+        .platform-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .platform-item {
+            padding: 10px 15px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .platform-supported {
+            border-color: #00aa00;
+            background-color: #001100;
+        }
+        
+        .platform-unsupported {
+            border-color: #aa0000;
+            background-color: #110000;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .layout {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Data Save</h1>
-        <p class="subtitle">Encryption & Compression</p>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-title">Data Save Docs</div>
+            <a href="#quick-start" class="menu-item">Quick Start</a>
+            <a href="#main-api" class="menu-item">Main API Class</a>
+            <a href="#core-operations" class="menu-item">Core Operations</a>
+            <a href="#save-slots" class="menu-item">Save Slot Management</a>
+            <a href="#data-types" class="menu-item">Supported Data Types</a>
+            <a href="#platforms" class="menu-item">Supported Platforms</a>
+            <a href="#webgl" class="menu-item">WebGL Support</a>
+        </nav>
         
-        <h2>Quick Start</h2>
-        
-        <ol>
-            <li>Add the <code>SetupWizard</code> component to any GameObject</li>
-            <li>Enable "Auto Generate Slot" in the inspector</li>
-            <li>Use the two-line API:</li>
-        </ol>
-        
-        <pre><code>// Save data
+        <main class="main-content">
+            <div class="container">
+                <section id="intro" class="section">
+                    <h1>Data Save</h1>
+                    <p class="subtitle">Encryption & Compression</p>
+                </section>
+                
+                <section id="quick-start" class="section">
+                    <h2>Quick Start</h2>
+                    
+                    <ol>
+                        <li>Add the <code>SetupWizard</code> component to any GameObject</li>
+                        <li>Enable "Auto Generate Slot" in the inspector</li>
+                        <li>Use the two-line API:</li>
+                    </ol>
+                    
+                    <pre><code>// Save data
 DataManager.Save("playerLevel", 5);
 
 // Load data
 int level = DataManager.Load&lt;int&gt;("playerLevel");</code></pre>
-        
-        <h2>Main API Class</h2>
-        
-        <p>All functionality is accessed through the static <code>DataManager</code> class.</p>
-        
-        <h3>Core Operations</h3>
-        
-        <div class="method">
-            <div class="method-signature">void Save(string key, object value)</div>
-            <div class="method-description">Saves a value with the specified key (synchronous)</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">Task SaveAsync(string key, object value)</div>
-            <div class="method-description">Saves a value with the specified key (asynchronous)</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">T Load&lt;T&gt;(string key)</div>
-            <div class="method-description">Loads a value from the specified key, returns default if not found</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">void DeleteValue(string key)</div>
-            <div class="method-description">Deletes the value associated with the specified key</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">Task DeleteValueAsync(string key)</div>
-            <div class="method-description">Deletes the value associated with the specified key (asynchronous)</div>
-        </div>
-        
-        <h3>Save Slot Management</h3>
-        
-        <div class="method">
-            <div class="method-signature">void CreateSaveSlot(string name)</div>
-            <div class="method-description">Creates a new save slot with the specified name</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">void DeleteSaveSlot(string name)</div>
-            <div class="method-description">Deletes the save slot with the specified name</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">void RenameSaveSlot(string oldName, string newName)</div>
-            <div class="method-description">Renames an existing save slot</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">void SetActiveSlot(string name)</div>
-            <div class="method-description">Sets the active save slot for all operations</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">void DeleteAllSaveSlots()</div>
-            <div class="method-description">Deletes all save slots</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">List&lt;SaveSlot&gt; GetSaveSlots()</div>
-            <div class="method-description">Returns a list of all save slots</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">bool DoesSlotExist(string name)</div>
-            <div class="method-description">Checks if a save slot with the specified name exists</div>
-        </div>
-        
-        <div class="method">
-            <div class="method-signature">bool IsValidSlotName(string name)</div>
-            <div class="method-description">Validates that a slot name contains valid characters for file operations</div>
-        </div>
-        
-        <h2>Supported Data Types</h2>
-        
-        <p><strong>Supported datatypes:</strong></p>
-        <ul style="margin-left: 20px; color: #e0e0e0;">
-            <li>Classes, Structs</li>
-            <li>Lists, Arrays</li>
-            <li>Vector2, Vector3, Vector4, Vector2Int, Vector3Int</li>
-            <li>Quaternion</li>
-            <li>Color, Color32</li>
-            <li>Rect, RectInt</li>
-            <li>Bounds, BoundsInt</li>
-            <li>Matrix4x4</li>
-            <li>Ray, Ray2D</li>
-            <li>Plane</li>
-            <li>AnimationCurve</li>
-            <li>Gradient</li>
-        </ul>
-        
-        <h2>Supported Platforms</h2>
-        
-        <p><strong>Supported OS's and build types</strong></p>
-        <ul style="margin-left: 20px; color: #e0e0e0;">
-            <li><strong>Windows</strong> ✅</li>
-            <li><strong>macOS</strong> ✅</li>
-            <li><strong>Linux</strong> ✅</li>
-            <li><strong>Android</strong> ✅</li>
-            <li><strong>iOS</strong> ✅</li>
-            <li><strong>WebGL</strong> ❌</li>
-            <li><strong>Console</strong> ❌</li>
-        </ul>
-        
-        <h2>WebGL Support</h2>
-        
-        <div class="warning">
-            <div class="warning-title">Important</div>
-            <p>WebGL builds do not support async methods due to platform limitations. Use the synchronous methods instead:</p>
-            <ul style="margin-top: 10px; margin-left: 20px;">
-                <li>Use <code>Save()</code> instead of <code>SaveAsync()</code></li>
-                <li>Use <code>DeleteValue()</code> instead of <code>DeleteValueAsync()</code></li>
-            </ul>
-        </div>
+                </section>
+                
+                <section id="main-api" class="section">
+                    <h2>Main API Class</h2>
+                    <p>All functionality is accessed through the static <code>DataManager</code> class.</p>
+                </section>
+                
+                <section id="core-operations" class="section">
+                    <h2>Core Operations</h2>
+                    
+                    <div class="method">
+                        <div class="method-signature">void Save(string key, object value)</div>
+                        <div class="method-description">Saves a value with the specified key (synchronous)</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">Task SaveAsync(string key, object value)</div>
+                        <div class="method-description">Saves a value with the specified key (asynchronous)</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">T Load&lt;T&gt;(string key)</div>
+                        <div class="method-description">Loads a value from the specified key, returns default if not found</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">void DeleteValue(string key)</div>
+                        <div class="method-description">Deletes the value associated with the specified key</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">Task DeleteValueAsync(string key)</div>
+                        <div class="method-description">Deletes the value associated with the specified key (asynchronous)</div>
+                    </div>
+                </section>
+                
+                <section id="save-slots" class="section">
+                    <h2>Save Slot Management</h2>
+                    
+                    <div class="method">
+                        <div class="method-signature">void CreateSaveSlot(string name)</div>
+                        <div class="method-description">Creates a new save slot with the specified name</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">void DeleteSaveSlot(string name)</div>
+                        <div class="method-description">Deletes the save slot with the specified name</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">void RenameSaveSlot(string oldName, string newName)</div>
+                        <div class="method-description">Renames an existing save slot</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">void SetActiveSlot(string name)</div>
+                        <div class="method-description">Sets the active save slot for all operations</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">void DeleteAllSaveSlots()</div>
+                        <div class="method-description">Deletes all save slots</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">List&lt;SaveSlot&gt; GetSaveSlots()</div>
+                        <div class="method-description">Returns a list of all save slots</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">bool DoesSlotExist(string name)</div>
+                        <div class="method-description">Checks if a save slot with the specified name exists</div>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="method-signature">bool IsValidSlotName(string name)</div>
+                        <div class="method-description">Validates that a slot name contains valid characters for file operations</div>
+                    </div>
+                </section>
+                
+                <section id="data-types" class="section">
+                    <h2>Supported Data Types</h2>
+                    
+                    <ul>
+                        <li>Classes, Structs</li>
+                        <li>Lists, Arrays</li>
+                        <li>Vector2, Vector3, Vector4, Vector2Int, Vector3Int</li>
+                        <li>Quaternion</li>
+                        <li>Color, Color32</li>
+                        <li>Rect, RectInt</li>
+                        <li>Bounds, BoundsInt</li>
+                        <li>Matrix4x4</li>
+                        <li>Ray, Ray2D</li>
+                        <li>Plane</li>
+                        <li>AnimationCurve</li>
+                        <li>Gradient</li>
+                    </ul>
+                </section>
+                
+                <section id="platforms" class="section">
+                    <h2>Supported Platforms</h2>
+                    
+                    <div class="platform-list">
+                        <div class="platform-item platform-supported">
+                            <span><strong>Windows</strong></span>
+                            <span>✅</span>
+                        </div>
+                        <div class="platform-item platform-supported">
+                            <span><strong>macOS</strong></span>
+                            <span>✅</span>
+                        </div>
+                        <div class="platform-item platform-supported">
+                            <span><strong>Linux</strong></span>
+                            <span>✅</span>
+                        </div>
+                        <div class="platform-item platform-supported">
+                            <span><strong>Android</strong></span>
+                            <span>✅</span>
+                        </div>
+                        <div class="platform-item platform-supported">
+                            <span><strong>iOS</strong></span>
+                            <span>✅</span>
+                        </div>
+                        <div class="platform-item platform-unsupported">
+                            <span><strong>WebGL</strong></span>
+                            <span>❌</span>
+                        </div>
+                        <div class="platform-item platform-unsupported">
+                            <span><strong>Console</strong></span>
+                            <span>❌</span>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="webgl" class="section">
+                    <h2>WebGL Support</h2>
+                    
+                    <div class="warning">
+                        <div class="warning-title">Important</div>
+                        <p>WebGL builds do not support async methods due to platform limitations. Use the synchronous methods instead:</p>
+                        <ul style="margin-top: 10px;">
+                            <li>Use <code>Save()</code> instead of <code>SaveAsync()</code></li>
+                            <li>Use <code>DeleteValue()</code> instead of <code>DeleteValueAsync()</code></li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </main>
     </div>
+    
+    <script>
+        // Simple scroll spy for menu highlighting
+        const menuItems = document.querySelectorAll('.menu-item');
+        const sections = document.querySelectorAll('section[id]');
+        
+        function highlightMenuItem() {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + current) {
+                    item.classList.add('active');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', highlightMenuItem);
+        highlightMenuItem(); // Initial call
+        
+        // Smooth scroll for menu items
+        menuItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = item.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
