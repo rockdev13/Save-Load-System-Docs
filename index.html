@@ -403,7 +403,7 @@ int level = DataManager.Load&lt;int&gt;("playerLevel");</code></pre>
                         </div>
                         <div class="platform-item platform-unsupported">
                             <span><strong>WebGL</strong></span>
-                            <span>❌</span>
+                            <span>✅</span>
                         </div>
                         <div class="platform-item platform-unsupported">
                             <span><strong>Console</strong></span>
@@ -412,7 +412,18 @@ int level = DataManager.Load&lt;int&gt;("playerLevel");</code></pre>
                     </div>
                 </section>
                 
-                
+                <section id="webgl" class="section">
+                    <h2>WebGL Support</h2>
+                    
+                    <div class="warning">
+                        <div class="warning-title">Important</div>
+                        <p>WebGL builds do not support async methods due to platform limitations. Use the synchronous methods instead:</p>
+                        <ul style="margin-top: 10px;">
+                            <li>Use <code>Save()</code> instead of <code>SaveAsync()</code></li>
+                            <li>Use <code>DeleteValue()</code> instead of <code>DeleteValueAsync()</code></li>
+                        </ul>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
